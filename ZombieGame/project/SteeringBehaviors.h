@@ -34,6 +34,16 @@ public:
 	SteeringPlugin_Output calculateSteering(float deltaT, AgentInfo* pAgent) override;
 };
 
+class SeekBackwards : public SteeringBehaviors
+{
+public:
+	SeekBackwards() = default;
+	virtual ~SeekBackwards() = default;
+
+	//Seek Behaviour
+	SteeringPlugin_Output calculateSteering(float deltaT, AgentInfo* pAgent) override;
+};
+
 class Forward : public SteeringBehaviors
 {
 public:

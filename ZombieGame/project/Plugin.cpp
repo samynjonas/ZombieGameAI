@@ -166,7 +166,7 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 										{
 											new Elite::BehaviorConditional(BT_Conditions::WasBitten),
 											new Elite::BehaviorAction(BT_Actions::GoToClosestHouse),
-											new Elite::BehaviorAction(BT_Actions::ChangeToSeek)
+											new Elite::BehaviorAction(BT_Actions::ChangeToSeekBackwards)
 										}
 									),
 
@@ -194,18 +194,20 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 							),
 							new Elite::BehaviorAction(BT_Actions::ChangeToSeek)
 						}
+			
 					)
 				}
 			),
-			
+
 			//Looting handling
 			new Elite::BehaviorSequence
 			(
 				{
-					//Do you see a house
+					//Do you see a house?
 					new Elite::BehaviorSelector
 					(
 						{
+							new Elite::BehaviorConditional(BT_Conditions::WasAttacked),
 							new Elite::BehaviorConditional(BT_Conditions::SeeNewHouse),
 							new Elite::BehaviorConditional(BT_Conditions::IsEnteringHouse)
 						}
@@ -446,6 +448,10 @@ SteeringPlugin_Output Plugin::UpdateSteering(float dt)
 	if (agentInfo.WasBitten == true)
 	{
 		m_pBlackboard->ChangeData("attacked", true);
+	}
+	if (agentInfo.IsInHouse == true)
+	{
+		m_pBlackboard->ChangeData("attacked", false);
 	}
 
 

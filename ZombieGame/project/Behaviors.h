@@ -123,6 +123,24 @@ namespace BT_Actions
 		pSteering->SetToFleeBackwards(targetPos);
 		return Elite::BehaviorState::Success;
 	}
+	Elite::BehaviorState ChangeToSeekBackwards(Elite::Blackboard* pBlackboard)
+	{
+		Steering* pSteering;
+		Elite::Vector2 targetPos;
+
+		if (pBlackboard->GetData("Steering", pSteering) == false || pSteering == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		if (pBlackboard->GetData("Target", targetPos) == false)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		pSteering->SetToFleeBackwards(targetPos);
+		return Elite::BehaviorState::Success;
+	}
 
 	Elite::BehaviorState ShootWeapon(Elite::Blackboard* pBlackboard)
 	{
@@ -314,6 +332,8 @@ namespace BT_Actions
 
 	Elite::BehaviorState LootHouse(Elite::Blackboard* pBlackboard)
 	{
+		//TODO improve searching algoritm
+
 		HouseInfo* pHouse;
 		AgentInfo* pAgent;
 		WorldDivider* pWorldDivider;
@@ -348,30 +368,41 @@ namespace BT_Actions
 			{	pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset }
 		};
 
-
 		lootingStages[0] = { pHouse->Center };
 		lootingStages[1] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
 		lootingStages[2] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
 		lootingStages[3] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
 		lootingStages[4] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
 
+		static std::vector<int> visitedPoints{ 0, 1, 2, 3, 4 };
 
-		pBlackboard->ChangeData("Target", lootingStages[currentStage]);
+		float range{ 10.f };
+		for (size_t index = 0; index < visitedPoints.size(); index++)
+		{
+			Elite::Vector2 point = lootingStages[visitedPoints[index]];
 
-		float range{ 2.f };
+			if (pAgent->Position.DistanceSquared(point) <= range)
+			{
+				visitedPoints.erase(visitedPoints.begin() + index);
+			}
+		}
 
-		if (pAgent->Position.DistanceSquared(lootingStages[currentStage]) <= range)
+		pBlackboard->ChangeData("Target", lootingStages[visitedPoints[currentStage]]);
+
+
+		if (pAgent->Position.DistanceSquared(lootingStages[visitedPoints[currentStage]]) <= range)
 		{
 			++currentStage;
 		}
 
-		if (currentStage >= 5)
+		if (currentStage >= visitedPoints.size() - 1)
 		{
-
 			pWorldDivider->AddHouse(pHouse->Center);
 			pBlackboard->ChangeData("Looting", false);
 
 			currentStage = 0;
+			visitedPoints.clear();
+
 			return Elite::BehaviorState::Failure;
 		}
 

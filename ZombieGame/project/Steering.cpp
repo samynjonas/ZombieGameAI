@@ -13,6 +13,7 @@ Steering::Steering()
 	m_pRotateLeft = new RotateLeft();
 	m_pTurnAround = new turnAround();
 	m_pFleeBackwards = new FleeBackward();
+	m_pSeekBackwards = new SeekBackwards();
 }
 
 Steering::~Steering()
@@ -26,6 +27,7 @@ Steering::~Steering()
 	SAFE_DELETE(m_pTurnAround);
 	SAFE_DELETE(m_pForward);
 	SAFE_DELETE(m_pFleeBackwards);
+	SAFE_DELETE(m_pSeekBackwards);
 }
 
 bool Steering::SetToWander()
@@ -76,6 +78,13 @@ bool Steering::SetToForward()
 bool Steering::SetToFleeBackwards(Elite::Vector2 target)
 {
 	m_pCurrentSteering = m_pFleeBackwards;
+	m_pCurrentSteering->SetTarget(target);
+	return true;
+}
+
+bool Steering::SetToSeekBackwards(Elite::Vector2 target)
+{
+	m_pCurrentSteering = m_pSeekBackwards;
 	m_pCurrentSteering->SetTarget(target);
 	return true;
 }

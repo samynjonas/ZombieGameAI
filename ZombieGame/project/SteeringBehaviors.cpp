@@ -16,6 +16,26 @@ SteeringPlugin_Output Seek::calculateSteering(float deltaT, AgentInfo* agent)
 	return steering;
 }
 
+SteeringPlugin_Output SeekBackwards::calculateSteering(float deltaT, AgentInfo* agent)
+{
+	SteeringPlugin_Output steering{};
+	steering.AutoOrient = false;
+
+	steering.LinearVelocity = m_Target - agent->Position;
+	steering.LinearVelocity.Normalize();
+	steering.LinearVelocity *= agent->MaxLinearSpeed;
+
+	Elite::Vector2 directionVector = (agent->LinearVelocity - agent->Position);
+	directionVector.Normalize();
+
+	const float agentRot{ agent->Orientation + 0.5f * static_cast<float>(M_PI) };
+	Elite::Vector2 agentDirection{ std::cosf(agentRot),std::sinf(agentRot) };
+
+	steering.AngularVelocity = (directionVector.Dot(agentDirection)) * agent->MaxAngularSpeed;
+
+	return steering;
+}
+
 SteeringPlugin_Output Flee::calculateSteering(float deltaT, AgentInfo* agent)
 {
 	SteeringPlugin_Output steering{};

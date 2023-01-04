@@ -1,0 +1,4 @@
+- Improved Scoring metrics
+- Fixed bug where shotgun would reward hits and kills multiple times per shot
+- Added debug feature - Spawning zombies on mouse click (bool GameDebugParams::SpawnZombieOnRightClick)
+- Added score submission feature in Release mode - Submit Score button in Game Over UI

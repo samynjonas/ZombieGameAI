@@ -34,6 +34,16 @@ public:
 	SteeringPlugin_Output calculateSteering(float deltaT, AgentInfo* pAgent) override;
 };
 
+class Forward : public SteeringBehaviors
+{
+public:
+	Forward() = default;
+	virtual ~Forward() = default;
+
+	//Forward Behaviour
+	SteeringPlugin_Output calculateSteering(float deltaT, AgentInfo* pAgent) override;
+};
+
 class Flee : public SteeringBehaviors
 {
 public:
@@ -103,7 +113,7 @@ protected:
 };
 
 
-class RotateLeft : public Wander
+class RotateLeft : public Face
 {
 public:
 	RotateLeft() = default;

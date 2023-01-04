@@ -29,6 +29,11 @@ public:
 	int GetCurrentQuadrant() const;
 	int GetDestinationQuadrant();
 
+	std::vector<Elite::Vector2> GetVisitedHouses() const;
+	void AddHouse(Elite::Vector2 centerPos);
+	void ResetVec();
+
+	bool constainsHouse(Elite::Vector2 centerPos) const;
 
 	Elite::Vector2 GetCenterOfQuadrant(int index) const;
 
@@ -37,6 +42,7 @@ private:
 	int m_DestinationQuadrant;
 
 	std::vector<quadrant> m_VecQuadrants;
+	std::vector<Elite::Vector2> m_VecExploredHouses;
 
 	Timer* m_pTimer;
 	float m_QuadrantMaxTime;

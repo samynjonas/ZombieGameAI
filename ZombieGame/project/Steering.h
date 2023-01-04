@@ -11,8 +11,9 @@ public:
 	bool SetToSeek(Elite::Vector2 seekPos);
 	bool SetToFlee(Elite::Vector2 fleePos);
 	bool SetToFace(Elite::Vector2 target);
-	bool SetToTurnAround(Elite::Vector2 target);
+	bool SetToTurnAround();
 	bool SetToRotateLeft();
+	bool SetToForward();
 
 	SteeringPlugin_Output GetSteering(float deltaT, AgentInfo* agent) const;
 	Elite::Vector2 GetTarget() const;
@@ -26,5 +27,6 @@ private:
 	SteeringBehaviors* m_pFace;
 	SteeringBehaviors* m_pRotateLeft;
 	SteeringBehaviors* m_pTurnAround;
+	SteeringBehaviors* m_pForward;
 };
 

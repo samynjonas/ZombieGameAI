@@ -3,7 +3,7 @@
 
 WorldDivider::WorldDivider(Elite::Vector2 Center, Elite::Vector2 Size)
 	: m_CurrentQuadrant{ 0 }
-	, m_DestinationQuadrant{ 0 }
+	, m_DestinationQuadrant{ 5 }
 	, m_QuadrantMaxTime{ 10 }
 {
 	m_pTimer = new Timer(m_QuadrantMaxTime);
@@ -64,6 +64,7 @@ void WorldDivider::Update(float deltaT, Elite::Vector2 playerPos)
 		{
 			m_CurrentQuadrant = index;
 			m_pTimer->Reset();
+			//ResetVec();
 		}
 		break;
 	}
@@ -80,7 +81,7 @@ int WorldDivider::GetDestinationQuadrant()
 	{
 		do
 		{
-			m_DestinationQuadrant = rand() % 9;
+			m_DestinationQuadrant = rand() % 3 + 3;
 		} while (m_DestinationQuadrant == m_CurrentQuadrant);
 
 		m_pTimer->Reset();
@@ -97,5 +98,39 @@ Elite::Vector2 WorldDivider::GetCenterOfQuadrant(int index) const
 	return center;
 }
 
+void WorldDivider::AddHouse(Elite::Vector2 centerPos)
+{
+	for (const Elite::Vector2& houseCenter : m_VecExploredHouses)
+	{
+		if (houseCenter == centerPos)
+		{
+			return;
+		}
+	}
+	m_VecExploredHouses.push_back(centerPos);
+}
+
+void WorldDivider::ResetVec()
+{
+	m_VecExploredHouses.clear();
+}
+
+std::vector<Elite::Vector2> WorldDivider::GetVisitedHouses() const
+{
+	return m_VecExploredHouses;
+}
+
+bool WorldDivider::constainsHouse(Elite::Vector2 centerPos) const
+{
+	for (const Elite::Vector2& houseCenter : m_VecExploredHouses)
+	{
+		if (houseCenter == centerPos)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
 
 

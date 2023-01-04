@@ -24,6 +24,12 @@ namespace BT_Actions
 {
 	Elite::BehaviorState ChangeToWander(Elite::Blackboard* pBlackboard)
 	{
+		AgentInfo* pAgent;
+		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
 		Steering* pSteering;
 		if (pBlackboard->GetData("Steering", pSteering) == false || pSteering == nullptr)
 		{
@@ -87,6 +93,18 @@ namespace BT_Actions
 		pSteering->SetToFace(targetPos);
 		return Elite::BehaviorState::Success;
 	}
+	Elite::BehaviorState ChangeToForward(Elite::Blackboard* pBlackboard)
+	{
+		Steering* pSteering;
+
+		if (pBlackboard->GetData("Steering", pSteering) == false || pSteering == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		pSteering->SetToForward();
+		return Elite::BehaviorState::Success;
+	}
 
 	Elite::BehaviorState ShootWeapon(Elite::Blackboard* pBlackboard)
 	{
@@ -105,7 +123,7 @@ namespace BT_Actions
 		}
 
 		pInventory->Shoot(pInterface);
-
+		pBlackboard->ChangeData("attacked", false);
 
 		return Elite::BehaviorState::Success;
 	}
@@ -154,7 +172,7 @@ namespace BT_Actions
 		return Elite::BehaviorState::Failure;
 	}
 
-	Elite::BehaviorState LookAround(Elite::Blackboard* pBlackboard)
+	Elite::BehaviorState RotateLeft(Elite::Blackboard* pBlackboard)
 	{
 		//Rotate agent
 		Steering* pSteering;
@@ -170,19 +188,13 @@ namespace BT_Actions
 	Elite::BehaviorState TurnAround(Elite::Blackboard* pBlackboard)
 	{
 		Steering* pSteering;
-		Elite::Vector2 targetPos;
 
 		if (pBlackboard->GetData("Steering", pSteering) == false || pSteering == nullptr)
 		{
 			return Elite::BehaviorState::Failure;
 		}
 
-		if (pBlackboard->GetData("Target", targetPos) == false)
-		{
-			return Elite::BehaviorState::Failure;
-		}
-
-		pSteering->SetToTurnAround(targetPos);
+		pSteering->SetToTurnAround();
 
 		return Elite::BehaviorState::Success;
 	}
@@ -227,6 +239,12 @@ namespace BT_Actions
 	{
 		HouseInfo* pHouse;
 		IExamInterface* pInterface;
+		AgentInfo* pAgent;
+
+		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
 
 		if (pBlackboard->GetData("Interface", pInterface) == false || pInterface == nullptr)
 		{
@@ -240,9 +258,15 @@ namespace BT_Actions
 
 		Elite::Vector2 point = pInterface->NavMesh_GetClosestPathPoint(pHouse->Center);
 
-		pBlackboard->ChangeData("House", pHouse);
 		pBlackboard->ChangeData("Target", point);
-		pBlackboard->ChangeData("EnteringHouse", true);
+		pBlackboard->ChangeData("EnteringHouse", true);		
+
+		if (pAgent->IsInHouse)
+		{
+			pBlackboard->ChangeData("EnteringHouse", false);
+			pBlackboard->ChangeData("Looting", true);
+		}
+
 
 		return Elite::BehaviorState::Success;
 	}
@@ -274,6 +298,7 @@ namespace BT_Actions
 	{
 		HouseInfo* pHouse;
 		AgentInfo* pAgent;
+		WorldDivider* pWorldDivider;
 
 		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
 		{
@@ -281,6 +306,11 @@ namespace BT_Actions
 		}
 
 		if (pBlackboard->GetData("House", pHouse) == false || pHouse == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		if (pBlackboard->GetData("WorldDivider", pWorldDivider) == false || pWorldDivider == nullptr)
 		{
 			return Elite::BehaviorState::Failure;
 		}
@@ -308,7 +338,6 @@ namespace BT_Actions
 		lootingStages[4] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
 
 
-
 		pBlackboard->ChangeData("Target", lootingStages[currentStage]);
 
 		float range{ 2.f };
@@ -320,7 +349,10 @@ namespace BT_Actions
 
 		if (currentStage >= 5)
 		{
+
+			pWorldDivider->AddHouse(pHouse->Center);
 			pBlackboard->ChangeData("Looting", false);
+
 			currentStage = 0;
 			return Elite::BehaviorState::Failure;
 		}
@@ -368,12 +400,17 @@ namespace BT_Actions
 //-----------------------------------------------------------------
 namespace BT_Conditions
 {
-	bool SeeHouse(Elite::Blackboard* pBlackboard)
+	//------------------
+	//House looting
+	//------------------
+	bool SeeNewHouse(Elite::Blackboard* pBlackboard)
 	{
+		//retrieving valid data from blackboard
 		AgentInfo* pAgent;
-		std::vector<HouseInfo>* pHouseVec;
-		IExamInterface* pInterface;
 		bool enteringHouse;
+		IExamInterface* pInterface;
+		WorldDivider* pWorldDivider;
+		std::vector<HouseInfo>* pHouseVec;
 
 		if (pBlackboard->GetData("EnteringHouse", enteringHouse) == false)
 		{
@@ -393,28 +430,78 @@ namespace BT_Conditions
 		if (pBlackboard->GetData("Houses", pHouseVec) == false || pHouseVec == nullptr)
 		{
 			return false;
+		}		
+
+		if (pBlackboard->GetData("WorldDivider", pWorldDivider) == false || pWorldDivider == nullptr)
+		{
+			return false;
 		}
 
-		HouseInfo house;
-		pInterface->Fov_GetHouseByIndex(0, house);
-
-		if (pHouseVec->empty() == false )
+		//Check if house is visited yet
+		std::vector<HouseInfo> NotVisitedHouse;
+		for (const HouseInfo currentHouse : (*pHouseVec))
 		{
-			HouseInfo* pHouse = new HouseInfo(house);
-			
-			if (pAgent->IsInHouse == false)
+			if (pWorldDivider->constainsHouse(currentHouse.Center) == false)
 			{
-				pBlackboard->ChangeData("Looting", true);
+				NotVisitedHouse.push_back(currentHouse);
 			}
+		}
+
+		if (NotVisitedHouse.empty())
+		{
+			return false;
+		}
+
+
+		//Getting closet non visited house
+		HouseInfo ClosestHouse = NotVisitedHouse[0];
+		float closestDistance{ ClosestHouse.Center.DistanceSquared(pAgent->Position) };
+
+		for (const HouseInfo currentHouse : NotVisitedHouse)
+		{
+			float currentDistance{ currentHouse.Center.DistanceSquared(pAgent->Position) };
+
+			if (currentDistance < closestDistance)
+			{
+				closestDistance = currentDistance;
+				ClosestHouse = currentHouse;
+			}
+		}
+
+		if (pHouseVec->empty() == false)
+		{
+			HouseInfo* pHouse = new HouseInfo(ClosestHouse);
 
 			pBlackboard->ChangeData("House", pHouse);
+			pBlackboard->ChangeData("EnteringHouse", true);
 			return true;
 		}
 		return false;
 	}
-	
+	bool IsEnteringHouse(Elite::Blackboard* pBlackboard)
+	{
+		AgentInfo* pAgent;
+		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
+		{
+			return false;
+		}
+
+		bool enteringHouse;
+		if (pBlackboard->GetData("EnteringHouse", enteringHouse) == false)
+		{
+			return false;
+		}
+
+		if (enteringHouse == true && pAgent->IsInHouse == false)
+		{
+			pBlackboard->ChangeData("Looting", enteringHouse);
+		}
+		return enteringHouse;
+	}
+
 	bool HasLootedHouse(Elite::Blackboard* pBlackboard)
 	{
+		//Is already looting
 		bool isLooting;
 		if (pBlackboard->GetData("Looting", isLooting) == false)
 		{
@@ -426,62 +513,81 @@ namespace BT_Conditions
 			return false;
 		}
 
+		//Retrieving valid data from blackboard
+		HouseInfo*		pPrevHouse;
+		WorldDivider*	pWorldDivider;
 
-		//TODO better check
-		HouseInfo* pHouse;
-		std::vector<HouseInfo>* pHouseVec;
-		IExamInterface* pInterface;
-
-		if (pBlackboard->GetData("Houses", pHouseVec) == false || pHouseVec == nullptr)
-		{
-			return false;
-		}
-
-		if (pBlackboard->GetData("Interface", pInterface) == false || pInterface == nullptr)
-		{
-			return false;
-		}
-
-		if (pHouseVec->empty())
-		{
-			return false;
-		}
-
-		HouseInfo* pPrevHouse;
 		if (pBlackboard->GetData("House", pPrevHouse) == false || pPrevHouse == nullptr)
 		{
 			return false;
 		}
 
-		if ((*pHouseVec)[0].Center.x == pPrevHouse->Center.x)
+		if (pBlackboard->GetData("WorldDivider", pWorldDivider) == false || pWorldDivider == nullptr)
+		{
+			return false;
+		}
+
+		//Check if the house has already been visited
+		if (pWorldDivider->constainsHouse(pPrevHouse->Center))
 		{
 			return true;
-		}
+		}		
 		return false;
 	}
+	bool IsLooting(Elite::Blackboard* pBlackboard)
+	{
+		bool isLooting;
+		if (pBlackboard->GetData("Looting", isLooting) == false)
+		{
+			return false;
+		}
 
-	bool SeeEnemy(Elite::Blackboard* pBlackboard)
+		return isLooting;
+	}
+
+	bool IsInHouse(Elite::Blackboard* pBlackboard)
 	{
 		AgentInfo* pAgent;
-		std::vector<EntityInfo>* pEntitiesVec;
-
+		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
+		{
+			return false;
+		}
+		return pAgent->IsInHouse;
+	}
+	bool NotInHouse(Elite::Blackboard* pBlackboard)
+	{
+		AgentInfo* pAgent;
 		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
 		{
 			return false;
 		}
 
+		return !pAgent->IsInHouse;
+	}
+	
+	//------------------
+	//Other
+	//------------------	
+	bool SeeEnemy(Elite::Blackboard* pBlackboard)
+	{
+		//retrieving valid data from blackboard
+		AgentInfo* pAgent;
+		std::vector<EntityInfo>* pEntitiesVec;
+		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
+		{
+			return false;
+		}
 		if (pBlackboard->GetData("Entities", pEntitiesVec) == false || pEntitiesVec == nullptr)
 		{
 			return false;
 		}
-
 		if (pEntitiesVec->empty())
 		{
 			return false;
 		}
 
+		//Putting al visible enemies in vector
 		std::vector<Elite::Vector2> enemies;
-
 		for (auto& Entity : *pEntitiesVec)
 		{
 			if (Entity.Type == eEntityType::ENEMY)
@@ -490,14 +596,15 @@ namespace BT_Conditions
 			}
 		}
 
+		//Checking if there are any enemies
 		if (enemies.empty())
 		{
 			return false;
 		}
 
+		//Getting distance to closest enemy
 		float distance{ enemies[0].DistanceSquared(pAgent->Position) };
 		size_t closestIndex{ 0 };
-
 		for (size_t index{ 1 }; index < enemies.size(); ++index)
 		{
 			float checkDistance{ enemies[index].DistanceSquared(pAgent->Position) };
@@ -509,12 +616,15 @@ namespace BT_Conditions
 			}
 		}
 
+		//Returning position of closest enemy
 		pBlackboard->ChangeData("Target", enemies[closestIndex]);
+		pBlackboard->ChangeData("attacked", true);
 		return true;
 	}
 	
 	bool SeeItem(Elite::Blackboard* pBlackboard)
 	{
+		//Retrieving valid data from blackboard
 		AgentInfo* pAgent;
 		std::vector<EntityInfo>* pEntitiesVec;
 
@@ -533,9 +643,9 @@ namespace BT_Conditions
 			return false;
 		}
 
+		//Putting all items in a vector
 		std::vector<Elite::Vector2> Items;
 		std::vector<size_t> entityIndex;
-
 		for (size_t index = 0; index < pEntitiesVec->size(); index++)
 		{
 			if ((*pEntitiesVec)[index].Type == eEntityType::ITEM)
@@ -550,9 +660,9 @@ namespace BT_Conditions
 			return false;
 		}
 
+		//Getting closest item
 		float distance{ Items[0].DistanceSquared(pAgent->Position) };
 		size_t closestIndex{ 0 };
-
 		for (size_t index{ 1 }; index < Items.size(); ++index)
 		{
 			float checkDistance{ Items[index].DistanceSquared(pAgent->Position) };
@@ -578,6 +688,7 @@ namespace BT_Conditions
 			return false;
 		}
 
+		//Update item
 		pBlackboard->ChangeData("Entity",	&closestEntity);
 		pBlackboard->ChangeData("Item",		&item);
 		pBlackboard->ChangeData("Target",	Items[closestIndex]);
@@ -586,6 +697,7 @@ namespace BT_Conditions
 
 	bool SeePurgeZone(Elite::Blackboard* pBlackboard)
 	{
+		//Retrieving valid data from blackboard
 		AgentInfo* pAgent;
 		std::vector<EntityInfo>* pEntitiesVec;
 
@@ -593,19 +705,17 @@ namespace BT_Conditions
 		{
 			return false;
 		}
-
 		if (pBlackboard->GetData("Entities", pEntitiesVec) == false || pEntitiesVec == nullptr)
 		{
 			return false;
 		}
-
 		if (pEntitiesVec->empty())
 		{
 			return false;
 		}
 
+		//Getting al purge zones
 		std::vector<Elite::Vector2> purges;
-
 		for (auto& Entity : *pEntitiesVec)
 		{
 			if (Entity.Type == eEntityType::PURGEZONE)
@@ -619,6 +729,7 @@ namespace BT_Conditions
 			return false;
 		}
 
+		//Getting closest purge zone
 		float distance{ purges[0].DistanceSquared(pAgent->Position) };
 		size_t closestIndex{ 0 };
 
@@ -633,19 +744,21 @@ namespace BT_Conditions
 			}
 		}
 
+		//Putting in
 		pBlackboard->ChangeData("Target", purges[closestIndex]);
 		return true;
 	}
 
 	bool LowOnHealth(Elite::Blackboard* pBlackboard)
 	{
+		//Retrieving valid data from blackboard
 		AgentInfo* pAgent;
-
 		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
 		{
 			return false;
 		}
 
+		//If health is lower then 5
 		if (pAgent->Health <= 5)
 		{
 			return true;
@@ -653,7 +766,6 @@ namespace BT_Conditions
 
 		return false;
 	}
-
 	bool LowOnEnergy(Elite::Blackboard* pBlackboard)
 	{
 		AgentInfo* pAgent;
@@ -724,7 +836,12 @@ namespace BT_Conditions
 			return false;
 		}
 
-		return true;
+
+		if (pInventory->GetAmmo(pInterface) > 0)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	bool IsTimerDone(Elite::Blackboard* pBlackboard)
@@ -738,70 +855,47 @@ namespace BT_Conditions
 		return pTimer->IsDone();
 	}
 
-	//TODO add inverter for conditions
-	bool IsInHouse(Elite::Blackboard* pBlackboard)
-	{
-		AgentInfo* pAgent;
-		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
-		{
-			return false;
-		}
-		return pAgent->IsInHouse;
-	}
-	bool NotInHouse(Elite::Blackboard* pBlackboard)
-	{
-		AgentInfo* pAgent;
-		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
+	bool IsInSight(Elite::Blackboard* pBlackboard)
+	{	
+		Elite::Vector2 enemyPos;
+		if (pBlackboard->GetData("Target", enemyPos) == false)
 		{
 			return false;
 		}
 
-		return !pAgent->IsInHouse;
-	}
-
-	bool IsEnteringHouse(Elite::Blackboard* pBlackboard)
-	{
 		AgentInfo* pAgent;
 		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
 		{
 			return false;
 		}
 
-		bool enteringHouse;
-		if (pBlackboard->GetData("EnteringHouse", enteringHouse) == false)
+
+		/*float angularVelocity{ Elite::ToDegrees(pAgent->AngularVelocity) };
+
+		if (angularVelocity <= 2.5f && angularVelocity >= -2.5f)
 		{
-			return false;
+			return true;
+		}*/
+
+		float widthToEnemy{	 enemyPos.x - pAgent->Position.x };
+		float heightToEnemy{ enemyPos.y - pAgent->Position.y };
+
+		float angleToEnemy{ tanf(heightToEnemy / widthToEnemy )};
+
+		float angleToEnemyDeg{	Elite::ToDegrees(angleToEnemy) };
+		float playerAngleDeg{	Elite::ToDegrees(pAgent->Orientation) };
+
+		std::cout << angleToEnemyDeg << " aiming " << playerAngleDeg << '\n';
+
+		float angleOffset{ 5.f };
+
+		if (angleToEnemyDeg > playerAngleDeg - angleOffset && angleToEnemyDeg < playerAngleDeg + angleOffset)
+		{
+			return true;
 		}
 
-		if (enteringHouse == true && pAgent->IsInHouse == false)
-		{
-			pBlackboard->ChangeData("Looting", enteringHouse);
-		}
-		return enteringHouse;
+		return false;
 	}
-
-	bool IsLooting(Elite::Blackboard* pBlackboard)
-	{
-		bool isLooting;
-		if (pBlackboard->GetData("Looting", isLooting) == false)
-		{
-			return false;
-		}
-
-		return isLooting;
-	}
-
-	bool IsAiming(Elite::Blackboard* pBlackboard)
-	{
-		bool isAiming;
-		if (pBlackboard->GetData("IsAiming", isAiming) == false)
-		{
-			return false;
-		}
-
-		return isAiming;
-	}
-
 
 	bool IsDestinationNotEqualToCurrentQuadrant(Elite::Blackboard* pBlackboard)
 	{
@@ -817,6 +911,17 @@ namespace BT_Conditions
 		}
 
 		return false;
+	}
+
+	bool WasAttacked(Elite::Blackboard* pBlackboard)
+	{
+		bool wasAttacked;
+		if (pBlackboard->GetData("attacked", wasAttacked) == false)
+		{
+			return false;
+		}
+
+		return wasAttacked;
 	}
 }
 #endif

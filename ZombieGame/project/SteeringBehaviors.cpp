@@ -7,6 +7,8 @@ SteeringPlugin_Output Seek::calculateSteering(float deltaT, AgentInfo* agent)
 {
 	SteeringPlugin_Output steering{};
 
+	steering.AutoOrient = true;
+
 	steering.LinearVelocity = m_Target - agent->Position;
 	steering.LinearVelocity.Normalize();
 	steering.LinearVelocity *= agent->MaxLinearSpeed;
@@ -17,6 +19,8 @@ SteeringPlugin_Output Seek::calculateSteering(float deltaT, AgentInfo* agent)
 SteeringPlugin_Output Flee::calculateSteering(float deltaT, AgentInfo* agent)
 {
 	SteeringPlugin_Output steering{};
+
+	steering.AutoOrient = true;
 
 	Elite::Vector2 fromTarget = agent->Position - m_Target;
 	float distance = fromTarget.Magnitude();
@@ -37,6 +41,8 @@ SteeringPlugin_Output Arrive::calculateSteering(float deltaT, AgentInfo* agent)
 {
 	SteeringPlugin_Output steering{};
 
+	steering.AutoOrient = true;
+
 	steering.LinearVelocity = agent->Position - m_Target;
 	steering.LinearVelocity.Normalize();
 
@@ -50,45 +56,31 @@ SteeringPlugin_Output Arrive::calculateSteering(float deltaT, AgentInfo* agent)
 SteeringPlugin_Output Face::calculateSteering(float deltaT, AgentInfo* agent)
 {
 	SteeringPlugin_Output steering{};
+	steering.AutoOrient = false;
 
-	Elite::Vector2 directionVector{ m_Target - agent->Position };
-	float angle{ acos(directionVector.x / directionVector.Magnitude()) };
-	if (directionVector.y < 0)
-	{
-		angle *= -1;
-	}
-
-	float rotationSpeed{ 180.f };
-	float angleOffset{ (5.f * static_cast<float>(M_PI)) / 180.f };
-	if (agent->Orientation > angle + angleOffset || agent->Orientation < angle - angleOffset)
-	{
-		steering.AngularVelocity = rotationSpeed * deltaT;
-	}
-	else
-	{
-		steering.AngularVelocity = 0;
-	}
-
-
+	Elite::Vector2 directionVector = (m_Target - agent->Position);
+	directionVector.Normalize();
+	
+	const float agentRot{ agent->Orientation + 0.5f * static_cast<float>(M_PI) };
+	Elite::Vector2 agentDirection{ std::cosf(agentRot),std::sinf(agentRot) };
+	
+	steering.AngularVelocity = (directionVector.Dot(agentDirection)) * agent->MaxAngularSpeed;
 	return steering;
 }
 
 SteeringPlugin_Output RotateLeft::calculateSteering(float deltaT, AgentInfo* agent)
 {
-	//TODO improve wandering
 	const Elite::Vector2 circleCenter{ agent->Position };
 
 	const float randAngle{ (static_cast<float>(rand() % 314)) / 10.f };
 
-	m_WanderAngle += randAngle;
-
-	const Elite::Vector2 newPoint{ circleCenter + Elite::Vector2{ cosf(m_WanderAngle), sinf(m_WanderAngle) } * m_Radius };
+	const Elite::Vector2 newPoint{ circleCenter + Elite::Vector2{ cosf(randAngle), sinf(randAngle) } * 10 };
 
 	m_Target = newPoint;
 
-	SteeringPlugin_Output steering{ Seek::calculateSteering(deltaT, agent) };
+	std::cout << "Rotating\n";
 
-	steering.LinearVelocity.Normalize();
+	SteeringPlugin_Output steering{ Face::calculateSteering(deltaT, agent) };
 
 	return steering;
 }
@@ -101,6 +93,15 @@ SteeringPlugin_Output turnAround::calculateSteering(float deltaT, AgentInfo* pAg
 
 	SteeringPlugin_Output steering{ Face::calculateSteering(deltaT, pAgent)};
 
+	return steering;
+}
+
+SteeringPlugin_Output Forward::calculateSteering(float deltaT, AgentInfo* pAgent)
+{
+	SteeringPlugin_Output steering{};
+	steering.AutoOrient = true;
+
+	steering.LinearVelocity = pAgent->LinearVelocity * pAgent->MaxLinearSpeed;
 	return steering;
 }
 

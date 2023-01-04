@@ -25,27 +25,42 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 
 	m_pInterface->World_GetInfo();
 
+	//Adding blackboard info
 	m_pBlackboard = new Elite::Blackboard();
+
+	//Pointers
 	m_pBlackboard->AddData("Agent",			&m_pInterface->Agent_GetInfo());
 	m_pBlackboard->AddData("Interface",		m_pInterface);
 	m_pBlackboard->AddData("Steering",		m_pSteering);
 	m_pBlackboard->AddData("Inventory",		m_pInventoryManager);
 	m_pBlackboard->AddData("WorldDivider",	m_pWorldDivider);
 	m_pBlackboard->AddData("Timer",			m_pTimer);
+
+	//Entity information
 	m_pBlackboard->AddData("Item",			static_cast<ItemInfo*>(nullptr));
 	m_pBlackboard->AddData("Entity",		static_cast<EntityInfo*>(nullptr));
 	m_pBlackboard->AddData("House",			static_cast<HouseInfo*>(nullptr));
 	m_pBlackboard->AddData("Target",		Elite::Vector2{});
+
+	//Fov vectors
 	m_pBlackboard->AddData("Entities",		&GetEntitiesInFOV());
 	m_pBlackboard->AddData("Houses",		&GetHousesInFOV());
+
+	//normal variables
 	m_pBlackboard->AddData("EnteringHouse", bool{ false });
 	m_pBlackboard->AddData("Looting",		bool{ false });
 	m_pBlackboard->AddData("IsAiming",		bool{ false });
 	m_pBlackboard->AddData("currentLoot",	int{ 0 });
+	m_pBlackboard->AddData("attacked",		bool{ false });
 
+
+	//Behavior tree
 	m_pBehaviorTree = new Elite::BehaviorTree(m_pBlackboard, new Elite::BehaviorSelector
 	(
 		{
+			//new Elite::BehaviorAction(BT_Actions::RotateLeft),
+
+
 			//Check for health or energy
 			new Elite::BehaviorSelector
 			(
@@ -76,8 +91,22 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 					new Elite::BehaviorSelector
 					(
 						{
-							new Elite::BehaviorConditional(BT_Conditions::WasBitten),
-							new Elite::BehaviorConditional(BT_Conditions::SeeEnemy),
+							new Elite::BehaviorSequence
+							(
+								{
+									new Elite::BehaviorConditional(BT_Conditions::SeeEnemy),
+									new Elite::BehaviorAction(BT_Actions::ChangeToFace)
+								}
+							),
+							
+							new Elite::BehaviorSequence
+							(
+								{
+									new Elite::BehaviorConditional(BT_Conditions::WasBitten),
+									new Elite::BehaviorAction(BT_Actions::RotateLeft)
+								}
+							),
+							
 						}
 					),
 			
@@ -88,22 +117,17 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 							new Elite::BehaviorSequence
 							(
 								{
+									new Elite::BehaviorConditional(BT_Conditions::SeeEnemy),
 									new Elite::BehaviorConditional(BT_Conditions::HasAmmo),
-									//Try to shoot
+									//Aim to enemy and shoot
 
-
-
-								}
-							),
-
-							new Elite::BehaviorSequence
-							(
-								{
-									new Elite::BehaviorConditional(BT_Conditions::IsAiming),
-									//Aim
-
-
-
+									new Elite::BehaviorSequence
+									(
+										{
+											new Elite::BehaviorConditional(BT_Conditions::IsInSight),
+											new Elite::BehaviorAction(BT_Actions::ShootWeapon)
+										}
+									)
 								}
 							),
 
@@ -111,7 +135,7 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 							(
 								{
 									//RUN AWAY
-									new Elite::BehaviorAction(BT_Actions::ChangeToFlee)
+									//new Elite::BehaviorAction(BT_Actions::ChangeToForward)
 								}
 							)
 							
@@ -149,7 +173,7 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 					new Elite::BehaviorSelector
 					(
 						{
-							new Elite::BehaviorConditional(BT_Conditions::SeeHouse),
+							new Elite::BehaviorConditional(BT_Conditions::SeeNewHouse),
 							new Elite::BehaviorConditional(BT_Conditions::IsEnteringHouse)
 						}
 					),
@@ -230,6 +254,7 @@ void Plugin::InitGameDebugParams(GameDebugParams& params)
 	params.SpawnPurgeZonesOnMiddleClick = true;
 	params.PrintDebugMessages = true;
 	params.ShowDebugItemNames = true;
+	params.SpawnZombieOnRightClick = true;
 	params.Seed = 36;
 }
 
@@ -385,6 +410,11 @@ SteeringPlugin_Output Plugin::UpdateSteering(float dt)
 	auto steering = SteeringPlugin_Output();
 
 	auto agentInfo = m_pInterface->Agent_GetInfo();
+	if (agentInfo.WasBitten == true)
+	{
+		m_pBlackboard->ChangeData("attacked", true);
+	}
+
 
 	auto vHousesInFOV = GetHousesInFOV();
 	auto vEntitiesInFOV = GetEntitiesInFOV();

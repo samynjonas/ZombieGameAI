@@ -1,19 +1,18 @@
 ﻿  stdafx.cpp
   EBehaviorTree.cpp
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\EBehaviorTree.cpp(102,2): warning C4809: switch statement has redundant 'default' label; all possible 'case' labels are given
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\EBehaviorTree.cpp(102,2): warning C4809: switch statement has redundant 'default' label; all possible 'case' labels are given
   InventoryManagement.cpp
   Plugin.cpp
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\Behaviors.h(431,14): warning C4101: 'pHouse': unreferenced local variable
   Steering.cpp
   SteeringBehaviors.cpp
   Timer.cpp
   WorldDivider.cpp
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\WorldDivider.cpp(20,33): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\WorldDivider.cpp(22,34): warning C4018: '<': signed/unsigned mismatch
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(20,33): warning C4018: '<': signed/unsigned mismatch
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(22,34): warning C4018: '<': signed/unsigned mismatch
   Generating Code...
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\InventoryManagement.cpp(196): warning C4172: returning address of local variable or temporary: weapon
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\InventoryManagement.cpp(208): warning C4172: returning address of local variable or temporary: food
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\InventoryManagement.cpp(190): warning C4172: returning address of local variable or temporary: weapon
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\InventoryManagement.cpp(202): warning C4172: returning address of local variable or temporary: healing
-     Creating library C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\..\_DEMO_DEBUG\GPP_Plugin_d.lib and object C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\project\..\_DEMO_DEBUG\GPP_Plugin_d.exp
-  GPP_Exam.vcxproj -> C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\DAE\Sem_3\Gameplay Programming\Exam\GPP_Exam\GPP_Exam\ZombieGame\_DEMO_DEBUG\GPP_Plugin_d.dll
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(202): warning C4172: returning address of local variable or temporary: healing
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(208): warning C4172: returning address of local variable or temporary: food
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(190): warning C4172: returning address of local variable or temporary: weapon
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(196): warning C4172: returning address of local variable or temporary: weapon
+     Creating library C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\..\_DEMO_DEBUG\GPP_Plugin_d.lib and object C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\..\_DEMO_DEBUG\GPP_Plugin_d.exp
+  GPP_Exam.vcxproj -> C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\_DEMO_DEBUG\GPP_Plugin_d.dll

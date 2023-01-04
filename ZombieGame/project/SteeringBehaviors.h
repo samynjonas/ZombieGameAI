@@ -62,6 +62,15 @@ private:
 
 };
 
+class FleeBackward : public SteeringBehaviors
+{
+public:
+	FleeBackward() = default;
+	virtual ~FleeBackward() = default;
+
+	SteeringPlugin_Output calculateSteering(float deltaT, AgentInfo* agent) override;
+};
+
 class Arrive : public SteeringBehaviors
 {
 public:

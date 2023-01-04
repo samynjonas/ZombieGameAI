@@ -87,30 +87,28 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 			new Elite::BehaviorSequence
 			(
 				{
-					//If there is an enemy
+					//Check for enemy presence
 					new Elite::BehaviorSelector
 					(
 						{
 							new Elite::BehaviorSequence
 							(
 								{
-									new Elite::BehaviorConditional(BT_Conditions::SeeEnemy),
-									new Elite::BehaviorAction(BT_Actions::ChangeToFace)
+									new Elite::BehaviorConditional(BT_Conditions::SeeEnemy)
 								}
 							),
-							
+
 							new Elite::BehaviorSequence
 							(
 								{
-									new Elite::BehaviorConditional(BT_Conditions::WasBitten),
-									new Elite::BehaviorAction(BT_Actions::RotateLeft)
+									new Elite::BehaviorConditional(BT_Conditions::WasBitten)
 								}
 							),
-							
+
 						}
 					),
-			
-					//action
+
+					//Take action
 					new Elite::BehaviorSelector
 					(
 						{
@@ -119,11 +117,11 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 								{
 									new Elite::BehaviorConditional(BT_Conditions::SeeEnemy),
 									new Elite::BehaviorConditional(BT_Conditions::HasAmmo),
-									//Aim to enemy and shoot
 
 									new Elite::BehaviorSequence
 									(
 										{
+											//Aim to enemy and shoot
 											new Elite::BehaviorConditional(BT_Conditions::IsInSight),
 											new Elite::BehaviorAction(BT_Actions::ShootWeapon)
 										}
@@ -135,10 +133,45 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 							(
 								{
 									//RUN AWAY
-									//new Elite::BehaviorAction(BT_Actions::ChangeToForward)
+									new Elite::BehaviorConditional(BT_Conditions::HasNoAmmo),
+									new Elite::BehaviorSelector
+									(
+										{
+											new Elite::BehaviorSequence
+											(
+												{
+													new Elite::BehaviorAction(BT_Actions::GoToClosestHouse),
+													new Elite::BehaviorAction(BT_Actions::ChangeToSeek)
+												}
+											),
+											new Elite::BehaviorAction(BT_Actions::ChangeToFlee)
+										}
+									)									
 								}
-							)
-							
+							),
+
+							new Elite::BehaviorSelector
+							(
+								{
+									new Elite::BehaviorSequence
+									(
+										{
+											new Elite::BehaviorConditional(BT_Conditions::SeeEnemy),
+											new Elite::BehaviorAction(BT_Actions::ChangeToFleeBackwards)
+										}
+									),
+
+									new Elite::BehaviorSequence
+									(
+										{
+											new Elite::BehaviorConditional(BT_Conditions::WasBitten),
+											new Elite::BehaviorAction(BT_Actions::GoToClosestHouse),
+											new Elite::BehaviorAction(BT_Actions::ChangeToSeek)
+										}
+									),
+
+								}
+							),
 						}
 					),
 				}

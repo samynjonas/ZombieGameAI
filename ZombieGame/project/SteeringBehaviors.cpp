@@ -25,14 +25,39 @@ SteeringPlugin_Output Flee::calculateSteering(float deltaT, AgentInfo* agent)
 	Elite::Vector2 fromTarget = agent->Position - m_Target;
 	float distance = fromTarget.Magnitude();
 
-	if (distance > m_FleeRadius)
+	/*if (distance > m_FleeRadius)
 	{
 		return steering;
-	}
+	}*/
 
 	steering.LinearVelocity = fromTarget;
 	steering.LinearVelocity.Normalize();
 	steering.LinearVelocity *= agent->MaxLinearSpeed;
+
+	return steering;
+}
+
+SteeringPlugin_Output FleeBackward::calculateSteering(float deltaT, AgentInfo* agent)
+{
+	SteeringPlugin_Output steering{};
+
+	steering.AutoOrient = false;
+
+	Elite::Vector2 fromTarget = agent->Position - m_Target;
+	float distance = fromTarget.Magnitude();
+
+	steering.LinearVelocity = fromTarget;
+	steering.LinearVelocity.Normalize();
+	steering.LinearVelocity *= agent->MaxLinearSpeed;
+
+
+	Elite::Vector2 directionVector = (m_Target - agent->Position);
+	directionVector.Normalize();
+
+	const float agentRot{ agent->Orientation + 0.5f * static_cast<float>(M_PI) };
+	Elite::Vector2 agentDirection{ std::cosf(agentRot),std::sinf(agentRot) };
+
+	steering.AngularVelocity = (directionVector.Dot(agentDirection)) * agent->MaxAngularSpeed;
 
 	return steering;
 }

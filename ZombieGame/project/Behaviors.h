@@ -105,6 +105,24 @@ namespace BT_Actions
 		pSteering->SetToForward();
 		return Elite::BehaviorState::Success;
 	}
+	Elite::BehaviorState ChangeToFleeBackwards(Elite::Blackboard* pBlackboard)
+	{
+		Steering* pSteering;
+		Elite::Vector2 targetPos;
+
+		if (pBlackboard->GetData("Steering", pSteering) == false || pSteering == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		if (pBlackboard->GetData("Target", targetPos) == false)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		pSteering->SetToFleeBackwards(targetPos);
+		return Elite::BehaviorState::Success;
+	}
 
 	Elite::BehaviorState ShootWeapon(Elite::Blackboard* pBlackboard)
 	{
@@ -389,6 +407,56 @@ namespace BT_Actions
 		}
 
 		Elite::Vector2 point = pInterface->NavMesh_GetClosestPathPoint(pWorldDivider->GetCenterOfQuadrant(pWorldDivider->GetDestinationQuadrant()));
+		pBlackboard->ChangeData("Target", point);
+
+		return Elite::BehaviorState::Success;
+	}
+
+	Elite::BehaviorState GoToClosestHouse(Elite::Blackboard* pBlackboard)
+	{
+		//Retrieve valid blackboard data
+		WorldDivider* pWorldDivider;
+		AgentInfo* pAgent;
+		IExamInterface* pInterface;
+
+		if (pBlackboard->GetData("Interface", pInterface) == false || pInterface == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+		
+		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		if (pBlackboard->GetData("WorldDivider", pWorldDivider) == false || pWorldDivider == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		if (pWorldDivider->GetVisitedHouses().empty())
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		Elite::Vector2 playerPos{ pAgent->Position };
+
+		//Get closest house
+		Elite::Vector2 closestHouse{ pWorldDivider->GetVisitedHouses()[0] };
+		float distance{ closestHouse.DistanceSquared(playerPos) };
+		for (const Elite::Vector2& house : pWorldDivider->GetVisitedHouses())
+		{
+			float newDistance{ house.DistanceSquared(playerPos) };
+			if (newDistance < distance)
+			{
+
+				closestHouse = house;
+				distance = newDistance;
+			}
+		}
+
+		//Get navmesh point to point and update blackboard
+		Elite::Vector2 point = pInterface->NavMesh_GetClosestPathPoint(closestHouse);
 		pBlackboard->ChangeData("Target", point);
 
 		return Elite::BehaviorState::Success;
@@ -844,6 +912,30 @@ namespace BT_Conditions
 		return false;
 	}
 
+	bool HasNoAmmo(Elite::Blackboard* pBlackboard)
+	{
+		//Get weapon slot and shoot
+		InventoryManagement* pInventory;
+		IExamInterface* pInterface;
+
+		if (pBlackboard->GetData("Inventory", pInventory) == false || pInventory == nullptr)
+		{
+			return false;
+		}
+
+		if (pBlackboard->GetData("Interface", pInterface) == false || pInterface == nullptr)
+		{
+			return false;
+		}
+
+
+		if (pInventory->GetAmmo(pInterface) == 0)
+		{
+			return true;
+		}
+		return false;
+	}
+
 	bool IsTimerDone(Elite::Blackboard* pBlackboard)
 	{
 		Timer* pTimer;
@@ -869,23 +961,13 @@ namespace BT_Conditions
 			return false;
 		}
 
-
-		/*float angularVelocity{ Elite::ToDegrees(pAgent->AngularVelocity) };
-
-		if (angularVelocity <= 2.5f && angularVelocity >= -2.5f)
-		{
-			return true;
-		}*/
-
 		float widthToEnemy{	 enemyPos.x - pAgent->Position.x };
 		float heightToEnemy{ enemyPos.y - pAgent->Position.y };
 
-		float angleToEnemy{ tanf(heightToEnemy / widthToEnemy )};
+		float angleToEnemy{ atan2f(heightToEnemy, widthToEnemy ) };
 
 		float angleToEnemyDeg{	Elite::ToDegrees(angleToEnemy) };
 		float playerAngleDeg{	Elite::ToDegrees(pAgent->Orientation) };
-
-		std::cout << angleToEnemyDeg << " aiming " << playerAngleDeg << '\n';
 
 		float angleOffset{ 5.f };
 

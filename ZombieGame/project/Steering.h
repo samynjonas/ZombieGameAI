@@ -11,6 +11,7 @@ public:
 	bool SetToSeek(Elite::Vector2 seekPos);
 	bool SetToFlee(Elite::Vector2 fleePos);
 	bool SetToFace(Elite::Vector2 target);
+	bool SetToFleeBackwards(Elite::Vector2 target);
 	bool SetToTurnAround();
 	bool SetToRotateLeft();
 	bool SetToForward();
@@ -28,5 +29,6 @@ private:
 	SteeringBehaviors* m_pRotateLeft;
 	SteeringBehaviors* m_pTurnAround;
 	SteeringBehaviors* m_pForward;
+	SteeringBehaviors* m_pFleeBackwards;
 };
 

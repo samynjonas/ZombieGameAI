@@ -20,7 +20,7 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 
 	m_pInventoryManager = new InventoryManagement();
 	m_pSteering = new Steering();
-	m_pTimer = new Timer(3000);
+	m_pTimer = new Timer(1000);
 	m_pWorldDivider = new WorldDivider(m_pInterface->World_GetInfo().Center, m_pInterface->World_GetInfo().Dimensions);
 
 	m_pInterface->World_GetInfo();
@@ -48,8 +48,7 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 
 	//normal variables
 	m_pBlackboard->AddData("EnteringHouse", bool{ false });
-	m_pBlackboard->AddData("Looting",		bool{ false });
-	m_pBlackboard->AddData("IsAiming",		bool{ false });
+	m_pBlackboard->AddData("Looted",		bool{ false });
 	m_pBlackboard->AddData("currentLoot",	int{ 0 });
 	m_pBlackboard->AddData("attacked",		bool{ false });
 
@@ -65,13 +64,13 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 			new Elite::BehaviorSelector
 			(
 				{
-					new Elite::BehaviorSequence
+					/*new Elite::BehaviorSequence
 					(
 						{
 							new Elite::BehaviorConditional(BT_Conditions::LowOnEnergy),
 							new Elite::BehaviorAction(BT_Actions::Eat)
 						}
-					),
+					),*/
 					new Elite::BehaviorSequence
 					(
 						{
@@ -82,120 +81,48 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 				}
 			),
 
+			//PurgeZone Handling
+			new Elite::BehaviorSequence
+			(
+				{
+					new Elite::BehaviorConditional(BT_Conditions::SeePurgeZone),
+					new Elite::BehaviorAction(BT_Actions::FleeFromPurgeZone)
+				}
+			),
 
 			//Enemy handling
 			new Elite::BehaviorSequence
 			(
 				{
-					//Check for enemy presence
+					new Elite::BehaviorConditional(BT_Conditions::EnemyPresence),
 					new Elite::BehaviorSelector
 					(
 						{
 							new Elite::BehaviorSequence
 							(
 								{
-									new Elite::BehaviorConditional(BT_Conditions::SeeEnemy)
-								}
-							),
-
-							new Elite::BehaviorSequence
-							(
-								{
-									new Elite::BehaviorConditional(BT_Conditions::WasBitten)
-								}
-							),
-
-						}
-					),
-
-					//Take action
-					new Elite::BehaviorSelector
-					(
-						{
-							new Elite::BehaviorSequence
-							(
-								{
-									new Elite::BehaviorConditional(BT_Conditions::SeeEnemy),
 									new Elite::BehaviorConditional(BT_Conditions::HasAmmo),
-
-									new Elite::BehaviorSequence
-									(
-										{
-											//Aim to enemy and shoot
-											new Elite::BehaviorConditional(BT_Conditions::IsInSight),
-											new Elite::BehaviorAction(BT_Actions::ShootWeapon)
-										}
-									)
+									new Elite::BehaviorAction(BT_Actions::AttackEnemy),
+									new Elite::BehaviorAction(BT_Actions::ShootWeapon)
 								}
 							),
-
 							new Elite::BehaviorSequence
 							(
 								{
-									//RUN AWAY
-									new Elite::BehaviorConditional(BT_Conditions::HasNoAmmo),
-									new Elite::BehaviorSelector
-									(
-										{
-											new Elite::BehaviorSequence
-											(
-												{
-													new Elite::BehaviorAction(BT_Actions::GoToClosestHouse),
-													new Elite::BehaviorAction(BT_Actions::ChangeToSeek)
-												}
-											),
-											new Elite::BehaviorAction(BT_Actions::ChangeToFlee)
-										}
-									)									
+									new Elite::BehaviorAction(BT_Actions::RunFromEnemy)
 								}
-							),
-
-							new Elite::BehaviorSelector
-							(
-								{
-									new Elite::BehaviorSequence
-									(
-										{
-											new Elite::BehaviorConditional(BT_Conditions::SeeEnemy),
-											new Elite::BehaviorAction(BT_Actions::ChangeToFleeBackwards)
-										}
-									),
-
-									new Elite::BehaviorSequence
-									(
-										{
-											new Elite::BehaviorConditional(BT_Conditions::WasBitten),
-											new Elite::BehaviorAction(BT_Actions::GoToClosestHouse),
-											new Elite::BehaviorAction(BT_Actions::ChangeToSeekBackwards)
-										}
-									),
-
-								}
-							),
+							)
 						}
 					),
 				}
-			),			
-			
+			),
+
 			//Item handling
 			new Elite::BehaviorSequence
 			(
 				{
 					new Elite::BehaviorConditional(BT_Conditions::SeeItem),
-					new Elite::BehaviorSelector
-					(
-						{
-							new Elite::BehaviorSequence
-							(
-								{
-									new Elite::BehaviorConditional(BT_Conditions::CanGrabItem),
-									new Elite::BehaviorAction(BT_Actions::PickUpItem)
-								}
-							),
-							new Elite::BehaviorAction(BT_Actions::ChangeToSeek)
-						}
-			
-					)
+					new Elite::BehaviorAction(BT_Actions::PickUpItem)
 				}
 			),
 
@@ -203,52 +130,26 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 			new Elite::BehaviorSequence
 			(
 				{
-					//Do you see a house?
 					new Elite::BehaviorSelector
 					(
 						{
-							new Elite::BehaviorConditional(BT_Conditions::WasAttacked),
 							new Elite::BehaviorConditional(BT_Conditions::SeeNewHouse),
-							new Elite::BehaviorConditional(BT_Conditions::IsEnteringHouse)
+							new Elite::BehaviorConditional(BT_Conditions::IsInHouse),
+							new Elite::BehaviorAction(BT_Actions::hasLeftHouse)
 						}
 					),
-
-					new Elite::BehaviorSelector
-					(
-						{
-							new Elite::BehaviorSequence //Is it looted already
-							(
-								{
-									new Elite::BehaviorConditional(BT_Conditions::HasLootedHouse),
-									new Elite::BehaviorConditional(BT_Conditions::IsInHouse),
-									new Elite::BehaviorAction(BT_Actions::LeaveHouse)
-								}
-							),
-							new Elite::BehaviorSequence //Are you in it but it is not looted
-							(
-								{
-									new Elite::BehaviorConditional(BT_Conditions::IsLooting),
-									new Elite::BehaviorConditional(BT_Conditions::IsInHouse),
-									new Elite::BehaviorAction(BT_Actions::LootHouse)
-								}
-							),
-							new Elite::BehaviorAction(BT_Actions::EnterHouse)
-						}
-					
-					),
-					new Elite::BehaviorAction(BT_Actions::ChangeToSeek)
+					new Elite::BehaviorAction(BT_Actions::EnterHouse),
+					new Elite::BehaviorAction(BT_Actions::LootHouse),
+					new Elite::BehaviorAction(BT_Actions::LeaveHouse)
 				}
 			),
-
-
 
 			//World exploration
 			new Elite::BehaviorSequence
 			(
 				{
-					new Elite::BehaviorConditional(BT_Conditions::IsDestinationNotEqualToCurrentQuadrant),
 					new Elite::BehaviorAction(BT_Actions::GoToDestinationQuadrant),
-					new Elite::BehaviorAction(BT_Actions::ChangeToSeek)
+					new Elite::BehaviorAction(BT_Actions::ExploreQuadrant)
 				}
 			),
 
@@ -257,7 +158,6 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 			new Elite::BehaviorAction(BT_Actions::ChangeToWander)
 		}
 	));
-
 }
 
 //Called only once
@@ -445,15 +345,21 @@ SteeringPlugin_Output Plugin::UpdateSteering(float dt)
 	auto steering = SteeringPlugin_Output();
 
 	auto agentInfo = m_pInterface->Agent_GetInfo();
-	if (agentInfo.WasBitten == true)
+
+	bool wasAttacked{};
+	m_pBlackboard->GetData("attacked", wasAttacked);
+
+	if (agentInfo.WasBitten == true && wasAttacked == false)
 	{
 		m_pBlackboard->ChangeData("attacked", true);
+		m_pTimer->Reset();
 	}
-	if (agentInfo.IsInHouse == true)
+	
+	m_pTimer->Update(dt);
+	if (m_pTimer->IsDone() && wasAttacked == true)
 	{
 		m_pBlackboard->ChangeData("attacked", false);
 	}
-
 
 	auto vHousesInFOV = GetHousesInFOV();
 	auto vEntitiesInFOV = GetEntitiesInFOV();
@@ -475,6 +381,8 @@ SteeringPlugin_Output Plugin::UpdateSteering(float dt)
 //This function should only be used for rendering debug elements
 void Plugin::Render(float dt) const
 {
+	m_pWorldDivider->Render();
+
 	//This Render function should only contain calls to Interface->Draw_... functions
 	m_pInterface->Draw_SolidCircle(m_Target, .7f, { 0,0 }, { 1, 0, 0 });
 

@@ -3,17 +3,39 @@
 C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\EBehaviorTree.cpp(102,2): warning C4809: switch statement has redundant 'default' label; all possible 'case' labels are given
   InventoryManagement.cpp
   Plugin.cpp
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(397,20): warning C4018: '>=': signed/unsigned mismatch
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(687,20): warning C4018: '>=': signed/unsigned mismatch
   Steering.cpp
   SteeringBehaviors.cpp
   Timer.cpp
   WorldDivider.cpp
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(20,33): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(22,34): warning C4018: '<': signed/unsigned mismatch
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(11,20): error C3646: 'World_GetInfo': unknown override specifier
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(11,34): error C2059: syntax error: ')'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(11,45): error C2238: unexpected token(s) preceding ';'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(12,25): error C3646: 'World_GetStats': unknown override specifier
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(12,40): error C2059: syntax error: ')'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(12,51): error C2238: unexpected token(s) preceding ';'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(14,47): error C2061: syntax error: identifier 'HouseInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(15,48): error C2061: syntax error: identifier 'EntityInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(17,20): error C3646: 'Agent_GetInfo': unknown override specifier
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(17,34): error C2059: syntax error: ')'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(17,45): error C2238: unexpected token(s) preceding ';'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(18,29): error C2061: syntax error: identifier 'EntityInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(24,46): error C2061: syntax error: identifier 'ItemInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(27,46): error C2061: syntax error: identifier 'ItemInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(31,28): error C2061: syntax error: identifier 'EntityInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(32,25): error C2061: syntax error: identifier 'EntityInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(33,28): error C2061: syntax error: identifier 'EntityInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(35,29): error C2061: syntax error: identifier 'ItemInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(36,31): error C2061: syntax error: identifier 'ItemInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(37,29): error C2061: syntax error: identifier 'ItemInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\inc\IExamInterface.h(41,33): error C2061: syntax error: identifier 'EntityInfo'
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(18,33): warning C4018: '<': signed/unsigned mismatch
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(20,34): warning C4018: '<': signed/unsigned mismatch
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(32,33): warning C4018: '<': signed/unsigned mismatch
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(34,34): warning C4018: '<': signed/unsigned mismatch
   Generating Code...
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(196): warning C4172: returning address of local variable or temporary: weapon
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(742): warning C4715: 'BT_Actions::hasLeftHouse': not all control paths return a value
 C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(208): warning C4172: returning address of local variable or temporary: food
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(202): warning C4172: returning address of local variable or temporary: healing
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(196): warning C4172: returning address of local variable or temporary: weapon
 C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(190): warning C4172: returning address of local variable or temporary: weapon
-     Creating library C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\..\_DEMO_DEBUG\GPP_Plugin_d.lib and object C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\..\_DEMO_DEBUG\GPP_Plugin_d.exp
-  GPP_Exam.vcxproj -> C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\_DEMO_DEBUG\GPP_Plugin_d.dll
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(202): warning C4172: returning address of local variable or temporary: healing

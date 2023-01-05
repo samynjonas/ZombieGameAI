@@ -1,5 +1,8 @@
 #pragma once
+#include <map>
+
 #include "Timer.h"
+#include "IExamInterface.h"
 
 struct quadrant
 {
@@ -19,7 +22,7 @@ struct quadrant
 };
 
 
-class WorldDivider
+class WorldDivider final
 {
 public:
 	WorldDivider(Elite::Vector2 Center, Elite::Vector2 Size);
@@ -29,7 +32,12 @@ public:
 	int GetCurrentQuadrant() const;
 	int GetDestinationQuadrant();
 
+
+	void Render() const;
+
 	std::vector<Elite::Vector2> GetVisitedHouses() const;
+	std::vector<Elite::Vector2> GetAllVisitedHouses() const;
+
 	void AddHouse(Elite::Vector2 centerPos);
 	void ResetVec();
 
@@ -40,9 +48,12 @@ public:
 private:
 	int m_CurrentQuadrant;
 	int m_DestinationQuadrant;
+	
+	std::vector<std::vector<Elite::Vector2>> m_VecExploredHousesInQuadrant;
 
 	std::vector<quadrant> m_VecQuadrants;
-	std::vector<Elite::Vector2> m_VecExploredHouses;
+
+	std::vector<quadrant> m_VecGrids;
 
 	Timer* m_pTimer;
 	float m_QuadrantMaxTime;

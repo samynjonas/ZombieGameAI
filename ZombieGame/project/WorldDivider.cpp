@@ -2,38 +2,26 @@
 #include "WorldDivider.h"
 
 WorldDivider::WorldDivider(Elite::Vector2 center, Elite::Vector2 size)
-	: m_CurrentQuadrant{ 0 }
+	: m_CurrentGrid{ 0 }
 	, m_DestinationQuadrant{ 5 }
 	, m_QuadrantMaxTime{ 25 }
+	, m_RowCollAmount{ 21 }
 {
+	m_CurrentGrid = (m_RowCollAmount * m_RowCollAmount) / 2;
+	m_DestinationQuadrant = m_CurrentGrid;
+
 	m_pTimer = new Timer(m_QuadrantMaxTime);
 
 	Elite::Vector2 worldPos{ center.x - size.x / 2, center.y - size.y / 2 };
 
+	float gridWidth{ size.x / m_RowCollAmount };
+	float gridHeight{ size.y / m_RowCollAmount };
 
-	int rowCollumAmount{ 3 };
-
-	float gridWidth{ size.x };
-	float gridHeight{ size.y };
-	for (size_t Windex = 0; Windex < rowCollumAmount; Windex++)
+	for (size_t Windex = 0; Windex < m_RowCollAmount; Windex++)
 	{
-		for (size_t Hindex = 0; Hindex < rowCollumAmount; Hindex++)
+		for (size_t Hindex = 0; Hindex < m_RowCollAmount; Hindex++)
 		{
-			m_VecGrids.push_back(quadrant{ worldPos.x + Windex * gridWidth, worldPos.y + Hindex * gridHeight, gridWidth, gridHeight });
-		}
-	}
-
-	int Xamount{ 3 };
-	int Yamount{ 3 };	
-	
-	float width{ size.x / Xamount };
-	float height{ size.y / 3 };
-
-	for (size_t Windex = 0; Windex < Xamount; Windex++)
-	{
-		for (size_t Hindex = 0; Hindex < Yamount; Hindex++)
-		{
-			m_VecQuadrants.push_back(quadrant{ worldPos.x + Windex * width, worldPos.y + Hindex * height, width, height });
+			m_VecGrids.push_back(grid{ worldPos.x + Windex * gridWidth, worldPos.y + Hindex * gridHeight, gridWidth, gridHeight });
 			m_VecExploredHousesInQuadrant.push_back(std::vector<Elite::Vector2>{});
 		}
 	}
@@ -44,100 +32,241 @@ WorldDivider::~WorldDivider()
 
 }
 
-void WorldDivider::Render() const
+void WorldDivider::Render(IExamInterface* pInterface) const
 {
-	/*for (const quadrant& grid : m_VecGrids)
+	for (const grid& currentGrid : m_VecGrids)
 	{
-		Elite::Vector2 p0{ grid.x, grid.y };
-		Elite::Vector2 p1{ grid.x, grid.y + grid.height };
-		Elite::Vector2 p2{ grid.x + grid.width, grid.y + grid.height };
-		Elite::Vector2 p3{ grid.x + grid.width, grid.y };
+		Elite::Vector2 p0{ currentGrid.x,					  currentGrid.y };
+		Elite::Vector2 p1{ currentGrid.x,					  currentGrid.y + currentGrid.height };
+		Elite::Vector2 p2{ currentGrid.x + currentGrid.width, currentGrid.y + currentGrid.height };
+		Elite::Vector2 p3{ currentGrid.x + currentGrid.width, currentGrid.y };
+		
+		Elite::Vector3 color{ 0, 0, 0 };
 
-		pInterface->Draw_Segment(p0, p1, Elite::Vector3{ 0, 0, 1 });
-		pInterface->Draw_Segment(p1, p2, Elite::Vector3{ 0, 0, 1 });
-		pInterface->Draw_Segment(p2, p3, Elite::Vector3{ 0, 0, 1 });
-		pInterface->Draw_Segment(p3, p0, Elite::Vector3{ 0, 0, 1 });
-	}*/
+		if (currentGrid.strength > 0)
+		{
+			color.z = static_cast<float>(currentGrid.strength);
+		}
+		else if (currentGrid.strength < 0)
+		{
+			color.x = static_cast<float>(abs(currentGrid.strength));
+		}
+
+		Elite::Vector2 points[]{p0, p1, p2, p3};
+		pInterface->Draw_SolidPolygon(points, 4, color / 10);
+	}
 }
 
 void WorldDivider::Update(float deltaT, Elite::Vector2 playerPos)
 {
-	m_pTimer->Update(deltaT);
-
-	int index{ -1 };
-	for (const quadrant& quad: m_VecQuadrants)
+	for (size_t index = 0; index < m_VecGrids.size(); index++)
 	{
-		++index;
-
-		if (playerPos.x < quad.x)
+		if (m_VecGrids[index].IsPointIn(playerPos))
 		{
-			continue;
+			if (index != m_CurrentGrid)
+			{
+				//Changed grids
+				if (m_VecGrids[m_CurrentGrid].strength <= 0)
+				{
+					//No houses found
+					--m_VecGrids[m_CurrentGrid].strength;
+				}
+			}
+			m_CurrentGrid = index;
+			break;
 		}
+	}
+}
 
-		if (playerPos.x > quad.x + quad.width)
-		{
-			continue;
-		}
+int WorldDivider::GetStrength() const
+{
+	return m_VecGrids[m_CurrentGrid].strength;
+}
 
-		if (playerPos.y < quad.y)
-		{
-			continue;
-		}
+int WorldDivider::GetCurrentGridIndex() const
+{
+	return m_CurrentGrid;
+}
+grid WorldDivider::GetCurrentGrid() const
+{
+	return m_VecGrids[m_CurrentGrid];
+}
+std::vector<grid> WorldDivider::GetAllGrids() const
+{
+	return m_VecGrids;
+}
 
-		if (playerPos.y > quad.y + quad.height)
+int WorldDivider::GetGridIndex(const grid& grid) const
+{
+	for (size_t index = 0; index < m_VecGrids.size(); index++)
+	{
+		if (grid.GetCenter() == m_VecGrids[index].GetCenter())
 		{
-			continue;
+			return index;
 		}
+	}
 
-		if (index != m_CurrentQuadrant)
-		{
-			m_CurrentQuadrant = index;
-			m_pTimer->Reset();
-			//ResetVec();
-		}
+	return 0;
+}
+
+std::vector<grid> WorldDivider::GetSurroundingGrids(int currentGridIndex) const
+{
+	enum class xPlacement { left, middle, right };
+	enum class yPlacement { top,  middle, bottom };
+
+	xPlacement xPlace{ xPlacement::middle };
+	yPlacement yPlace{ yPlacement::middle };
+
+	if (currentGridIndex % m_RowCollAmount == 0)
+	{
+		xPlace = xPlacement::left;
+	}
+	else if (currentGridIndex + 1 % m_RowCollAmount == 0)
+	{
+		xPlace = xPlacement::right;
+	}
+
+	if (currentGridIndex + m_RowCollAmount > m_RowCollAmount * m_RowCollAmount)
+	{
+		yPlace = yPlacement::top;
+	}
+	else if (currentGridIndex - m_RowCollAmount < 0)
+	{
+		yPlace = yPlacement::bottom;
+	}
+
+	std::vector<grid> surroundingGrids;
+
+
+	switch (xPlace)
+	{
+	case xPlacement::left:
+		//only add right
+		surroundingGrids.push_back(m_VecGrids[m_CurrentGrid + 1]);
+		break;
+	case xPlacement::middle:
+		//add middle and right
+		surroundingGrids.push_back(m_VecGrids[m_CurrentGrid - 1]);
+		surroundingGrids.push_back(m_VecGrids[m_CurrentGrid + 1]);
+		break;
+	case xPlacement::right:
+		//only add left
+		surroundingGrids.push_back(m_VecGrids[m_CurrentGrid - 1]);
+		break;
+	default:
 		break;
 	}
-}
 
-int WorldDivider::GetCurrentQuadrant() const
-{
-	return m_CurrentQuadrant;
-}
-
-int WorldDivider::GetDestinationQuadrant()
-{
-	if (m_pTimer->IsDone() && m_CurrentQuadrant == m_DestinationQuadrant)
+	switch (yPlace)
 	{
-		do
-		{
-			m_DestinationQuadrant = rand() % 3 + 3;
-		} while (m_DestinationQuadrant == m_CurrentQuadrant);
-
-		m_pTimer->Reset();
-		return m_DestinationQuadrant;
+	case yPlacement::top:
+		//only add bottom
+		surroundingGrids.push_back(m_VecGrids[m_CurrentGrid - m_RowCollAmount]);
+		break;
+	case yPlacement::middle:
+		//add bottom and top
+		surroundingGrids.push_back(m_VecGrids[m_CurrentGrid - m_RowCollAmount]);
+		surroundingGrids.push_back(m_VecGrids[m_CurrentGrid + m_RowCollAmount]);
+		break;
+	case yPlacement::bottom:
+		//only add top
+		surroundingGrids.push_back(m_VecGrids[m_CurrentGrid + m_RowCollAmount]);
+		break;
+	default:
+		break;
 	}
+
+	return surroundingGrids;
+}
+
+int WorldDivider::GetDestinationGrid()
+{
 	return m_DestinationQuadrant;
 }
 
 Elite::Vector2 WorldDivider::GetCenterOfQuadrant(int index) const
 {
-	quadrant quadrant = m_VecQuadrants[index];
-	Elite::Vector2 center{ quadrant.x + quadrant.width / 2, quadrant.y + quadrant.height / 2 };
-
-	return center;
+	return m_VecGrids[index].GetCenter();
 }
 
-void WorldDivider::AddHouse(Elite::Vector2 centerPos)
+void WorldDivider::AddHouse(HouseInfo house)
 {
-	for (const Elite::Vector2& houseCenter : m_VecExploredHousesInQuadrant[m_CurrentQuadrant])
+	for (const Elite::Vector2& houseCenter : m_VecExploredHousesInQuadrant[m_CurrentGrid])
 	{
-		if (houseCenter == centerPos)
+		if (houseCenter == house.Center)
 		{
 			return;
 		}
 	}
 
-	m_VecExploredHousesInQuadrant[m_CurrentQuadrant].push_back(centerPos);
+	Elite::Vector2 houseLeftUnder{ house.Center - house.Size / 2 };
+
+	Elite::Vector2 p0{ house.Center };
+	Elite::Vector2 p1{ houseLeftUnder };
+	Elite::Vector2 p2{ houseLeftUnder.x,				houseLeftUnder.y + house.Size.y };
+	Elite::Vector2 p3{ houseLeftUnder.x + house.Size.x, houseLeftUnder.y + house.Size.y };
+	Elite::Vector2 p4{ houseLeftUnder.x + house.Size.x, houseLeftUnder.y };
+
+	for (grid& grid : m_VecGrids)
+	{
+		if (grid.IsPointIn(p0))
+		{
+			if (grid.strength < 0)
+			{
+				grid.strength = 0;
+			}
+			++grid.strength;
+
+			m_VecExploredHousesInQuadrant[GetGridIndex(grid)].push_back(house.Center);
+			continue;
+		}
+		if (grid.IsPointIn(p1))
+		{
+			if (grid.strength < 0)
+			{
+				grid.strength = 0;
+			}
+			++grid.strength;
+
+			m_VecExploredHousesInQuadrant[GetGridIndex(grid)].push_back(house.Center);
+			continue;
+		}
+		if (grid.IsPointIn(p2))
+		{
+			if (grid.strength < 0)
+			{
+				grid.strength = 0;
+			}
+			++grid.strength;
+
+			m_VecExploredHousesInQuadrant[GetGridIndex(grid)].push_back(house.Center);
+			continue;
+		}
+		if (grid.IsPointIn(p3))
+		{
+			if (grid.strength < 0)
+			{
+				grid.strength = 0;
+			}
+			++grid.strength;
+
+			m_VecExploredHousesInQuadrant[GetGridIndex(grid)].push_back(house.Center);
+			continue;
+		}
+		if (grid.IsPointIn(p4))
+		{
+			if (grid.strength < 0)
+			{
+				grid.strength = 0;
+			}
+			++grid.strength;
+
+			m_VecExploredHousesInQuadrant[GetGridIndex(grid)].push_back(house.Center);
+			continue;
+		}
+	}
+
+	m_VecExploredHousesInQuadrant[m_CurrentGrid].push_back(house.Center);
 }
 
 void WorldDivider::ResetVec()
@@ -150,8 +279,7 @@ void WorldDivider::ResetVec()
 
 std::vector<Elite::Vector2> WorldDivider::GetVisitedHouses() const
 {
-	return m_VecExploredHousesInQuadrant[m_CurrentQuadrant];
-	//return m_VecExploredHouses;
+	return m_VecExploredHousesInQuadrant[m_CurrentGrid];
 }
 
 std::vector<Elite::Vector2> WorldDivider::GetAllVisitedHouses() const
@@ -164,21 +292,21 @@ std::vector<Elite::Vector2> WorldDivider::GetAllVisitedHouses() const
 			allHouses.push_back(m_VecExploredHousesInQuadrant[Quadrantindex][index]);
 		}
 	}
-
 	return allHouses;
 }
 
 bool WorldDivider::constainsHouse(Elite::Vector2 centerPos) const
 {
-	for (const Elite::Vector2& houseCenter : m_VecExploredHousesInQuadrant[m_CurrentQuadrant])
+	for (size_t index = 0; index < m_VecExploredHousesInQuadrant.size(); index++)
 	{
-		if (houseCenter == centerPos)
+		for (const Elite::Vector2& houseCenter : m_VecExploredHousesInQuadrant[index])
 		{
-			return true;
+			if (houseCenter == centerPos)
+			{
+				return true;
+			}
 		}
 	}
 
-	return false;
+	return false;	
 }
-
-

@@ -2,6 +2,7 @@
 #include "Steering.h"
 
 Steering::Steering()
+	: m_RunMode{ false }
 {
 	m_pCurrentSteering = new Wander();
 
@@ -89,9 +90,18 @@ bool Steering::SetToSeekBackwards(Elite::Vector2 target)
 	return true;
 }
 
+void Steering::SetRunMode(bool set)
+{
+	m_RunMode = set;
+}
+
 SteeringPlugin_Output Steering::GetSteering(float deltaT, AgentInfo* agent) const
 {
-	return m_pCurrentSteering->calculateSteering(deltaT, agent);
+	SteeringPlugin_Output steering{ m_pCurrentSteering->calculateSteering(deltaT, agent) };
+
+	steering.RunMode = m_RunMode;
+
+	return steering;
 }
 
 Elite::Vector2 Steering::GetTarget() const

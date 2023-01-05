@@ -27,6 +27,9 @@ public:
 	bool Shoot(IExamInterface* pInterface);
 
 	int GetAmmo(IExamInterface* pInterface) const;
+	int GetHealth(IExamInterface* pInterface) const;
+	int GetEnergy(IExamInterface* pInterface) const;
+
 
 	ItemInfo& GetPistol(IExamInterface* pInterface);
 	ItemInfo& GetShotgun(IExamInterface* pInterface);

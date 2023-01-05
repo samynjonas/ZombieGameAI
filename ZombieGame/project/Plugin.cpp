@@ -64,13 +64,13 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 			new Elite::BehaviorSelector
 			(
 				{
-					/*new Elite::BehaviorSequence
+					new Elite::BehaviorSequence
 					(
 						{
 							new Elite::BehaviorConditional(BT_Conditions::LowOnEnergy),
 							new Elite::BehaviorAction(BT_Actions::Eat)
 						}
-					),*/
+					),
 					new Elite::BehaviorSequence
 					(
 						{
@@ -109,7 +109,7 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 							new Elite::BehaviorSequence
 							(
 								{
-									new Elite::BehaviorAction(BT_Actions::RunFromEnemy)
+									new Elite::BehaviorAction(BT_Actions::GoToClosestHouse)
 								}
 							)
 						}
@@ -148,8 +148,7 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 			new Elite::BehaviorSequence
 			(
 				{
-					new Elite::BehaviorAction(BT_Actions::GoToDestinationQuadrant),
-					new Elite::BehaviorAction(BT_Actions::ExploreQuadrant)
+					new Elite::BehaviorAction(BT_Actions::GoToNextGrid)
 				}
 			),
 
@@ -381,7 +380,7 @@ SteeringPlugin_Output Plugin::UpdateSteering(float dt)
 //This function should only be used for rendering debug elements
 void Plugin::Render(float dt) const
 {
-	m_pWorldDivider->Render();
+	m_pWorldDivider->Render(m_pInterface);
 
 	//This Render function should only contain calls to Interface->Draw_... functions
 	m_pInterface->Draw_SolidCircle(m_Target, .7f, { 0,0 }, { 1, 0, 0 });

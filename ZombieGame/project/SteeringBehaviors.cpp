@@ -45,7 +45,6 @@ SteeringPlugin_Output Flee::calculateSteering(float deltaT, AgentInfo* agent)
 	steering.AutoOrient = true;
 	steering.RunMode = true;
 
-
 	Elite::Vector2 fromTarget = agent->Position - m_Target;
 	float distance = fromTarget.Magnitude();
 
@@ -128,15 +127,13 @@ SteeringPlugin_Output RotateLeft::calculateSteering(float deltaT, AgentInfo* age
 	const Elite::Vector2 circleCenter{ agent->Position };
 
 	static float angle{ 0 };
-	angle += Elite::ToRadians(1);
+	angle += Elite::ToRadians(0.5f);
 
 	//const float randAngle{ (static_cast<float>(rand() % 314)) / 10.f };
 
 	const Elite::Vector2 newPoint{ circleCenter + Elite::Vector2{ cosf(angle), sinf(angle) } * 10 };
 
 	m_Target = newPoint;
-
-	std::cout << "Rotating\n";
 
 	SteeringPlugin_Output steering{ Face::calculateSteering(deltaT, agent) };
 

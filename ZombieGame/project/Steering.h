@@ -19,6 +19,8 @@ public:
 	bool SetToRotateLeft();
 	bool SetToForward();
 
+	void SetRunMode(bool set);
+
 	SteeringPlugin_Output GetSteering(float deltaT, AgentInfo* agent) const;
 	Elite::Vector2 GetTarget() const;
 
@@ -34,5 +36,7 @@ private:
 	SteeringBehaviors* m_pForward;
 	SteeringBehaviors* m_pFleeBackwards;
 	SteeringBehaviors* m_pSeekBackwards;
+
+	bool m_RunMode;
 };
 

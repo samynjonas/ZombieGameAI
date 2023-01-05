@@ -182,6 +182,27 @@ int InventoryManagement::GetAmmo(IExamInterface* pInterface) const
 
 	return totalAmmo;
 }
+int InventoryManagement::GetHealth(IExamInterface* pInterface) const
+{
+	ItemInfo healing;
+	if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Healing), healing) == true)
+	{
+		return pInterface->Medkit_GetHealth(healing);
+	}
+
+	return 0;
+}
+int InventoryManagement::GetEnergy(IExamInterface* pInterface) const
+{
+	ItemInfo food;
+	if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Food), food) == true)
+	{
+		return pInterface->Food_GetEnergy(food);
+	}
+
+	return 0;
+}
+
 
 ItemInfo& InventoryManagement::GetPistol(IExamInterface* pInterface)
 {

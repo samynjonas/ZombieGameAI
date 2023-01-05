@@ -1,8 +1,11 @@
 #pragma once
 #include <map>
 
-#include "Timer.h"
+#include "Exam_HelperStructs.h"
+
 #include "IExamInterface.h"
+
+#include "Timer.h"
 
 struct quadrant
 {
@@ -21,6 +24,55 @@ struct quadrant
 	float height;
 };
 
+struct grid
+{
+	grid(float X, float Y, float W, float H)
+		: x{ X }
+		, y{ Y }
+		, width{ W }
+		, height{ H }
+		, strength{ 0 }
+	{
+
+	}
+
+	bool IsPointIn(Elite::Vector2 point) const
+	{
+		if (point.x < x)
+		{
+			return false;
+		}
+
+		if (point.x > x + width)
+		{
+			return false;
+		}
+
+		if (point.y < y)
+		{
+			return false;
+		}
+
+		if (point.y > y + height)
+		{
+			return false;
+		}
+
+		return true;
+	}
+	Elite::Vector2 GetCenter() const
+	{
+		return Elite::Vector2{ x + width / 2, y + height / 2 };
+	}
+
+	float x;
+	float y;
+	float width;
+	float height;
+
+	int strength; //Will go up when there is something interesting in it
+};
+
 
 class WorldDivider final
 {
@@ -29,35 +81,38 @@ public:
 	~WorldDivider();
 
 	void Update(float deltaT, Elite::Vector2 playerPos);
-	int GetCurrentQuadrant() const;
-	int GetDestinationQuadrant();
+	void Render(IExamInterface* pInterface) const;
+	
 
+	int GetStrength() const;
+	int GetCurrentGridIndex() const;
+	int GetGridIndex(const grid& grid) const;
 
-	void Render() const;
+	grid GetCurrentGrid() const;
+	std::vector<grid> GetAllGrids() const;
+
+	std::vector<grid> GetSurroundingGrids(int currentGridIndex) const;
+
+	int GetDestinationGrid();
+	bool constainsHouse(Elite::Vector2 centerPos) const;
+	Elite::Vector2 GetCenterOfQuadrant(int index) const;
 
 	std::vector<Elite::Vector2> GetVisitedHouses() const;
 	std::vector<Elite::Vector2> GetAllVisitedHouses() const;
 
-	void AddHouse(Elite::Vector2 centerPos);
+	void AddHouse(HouseInfo house);
 	void ResetVec();
 
-	bool constainsHouse(Elite::Vector2 centerPos) const;
-
-	Elite::Vector2 GetCenterOfQuadrant(int index) const;
-
 private:
-	int m_CurrentQuadrant;
+	int m_CurrentGrid;
 	int m_DestinationQuadrant;
+	int m_RowCollAmount;
 	
 	std::vector<std::vector<Elite::Vector2>> m_VecExploredHousesInQuadrant;
 
-	std::vector<quadrant> m_VecQuadrants;
-
-	std::vector<quadrant> m_VecGrids;
+	std::vector<grid> m_VecGrids;
 
 	Timer* m_pTimer;
 	float m_QuadrantMaxTime;
-
-
 };
 

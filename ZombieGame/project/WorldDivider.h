@@ -97,6 +97,10 @@ public:
 	bool constainsHouse(Elite::Vector2 centerPos) const;
 	Elite::Vector2 GetCenterOfQuadrant(int index) const;
 
+	int GetNextGrid();
+	bool isGridIndexOnWorldBorder(int index) const;
+	bool isWorldExplored() const;
+
 	std::vector<Elite::Vector2> GetVisitedHouses() const;
 	std::vector<Elite::Vector2> GetAllVisitedHouses() const;
 
@@ -108,6 +112,9 @@ private:
 	int m_DestinationQuadrant;
 	int m_RowCollAmount;
 	
+
+
+
 	std::vector<std::vector<Elite::Vector2>> m_VecExploredHousesInQuadrant;
 
 	std::vector<grid> m_VecGrids;

@@ -195,6 +195,7 @@ namespace BT_Actions
 	//----------------------
 	//World exploration
 	//----------------------
+	
 	Elite::BehaviorState GoToNextGrid(Elite::Blackboard* pBlackboard)
 	{
 		AgentInfo* pAgent;
@@ -321,7 +322,58 @@ namespace BT_Actions
 	}
 
 
+	Elite::BehaviorState VisitedNextGrid(Elite::Blackboard* pBlackboard)
+	{
+		AgentInfo* pAgent;
+		Steering* pSteering;
+		IExamInterface* pInterface;
+		WorldDivider* pWorldDivider;
+		InventoryManagement* pInventory;
 
+		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		if (pBlackboard->GetData("Inventory", pInventory) == false || pInventory == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		if (pBlackboard->GetData("Steering", pSteering) == false || pSteering == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		if (pBlackboard->GetData("Interface", pInterface) == false || pInterface == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+		if (pBlackboard->GetData("WorldDivider", pWorldDivider) == false || pWorldDivider == nullptr)
+		{
+			return Elite::BehaviorState::Failure;
+		}
+
+
+		static int destIndex{ pWorldDivider->GetNextGrid() };
+		Elite::Vector2 gridPos{ pWorldDivider->GetAllGrids()[destIndex].GetCenter() };
+
+		if (pAgent->Position.DistanceSquared(gridPos) <= 25)
+		{
+			//Calculate new next
+			destIndex = pWorldDivider->GetNextGrid();
+		}
+
+		Elite::Vector2 goToPoint = pInterface->NavMesh_GetClosestPathPoint(gridPos);
+
+		pSteering->SetRunMode(false);
+		pSteering->SetToSeek(goToPoint);
+		return Elite::BehaviorState::Running;
+
+	}
+	
+	
 	Elite::BehaviorState ExploreQuadrant(Elite::Blackboard* pBlackboard)
 	{
 		Steering* pSteering;

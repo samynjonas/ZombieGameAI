@@ -57,9 +57,6 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 	m_pBehaviorTree = new Elite::BehaviorTree(m_pBlackboard, new Elite::BehaviorSelector
 	(
 		{
-			//new Elite::BehaviorAction(BT_Actions::RotateLeft),
-
-
 			//Check for health or energy
 			new Elite::BehaviorSelector
 			(
@@ -148,7 +145,7 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 			new Elite::BehaviorSequence
 			(
 				{
-					new Elite::BehaviorAction(BT_Actions::GoToNextGrid)
+					new Elite::BehaviorAction(BT_Actions::VisitedNextGrid)
 				}
 			),
 

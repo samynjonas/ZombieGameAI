@@ -180,6 +180,11 @@ int InventoryManagement::GetAmmo(IExamInterface* pInterface) const
 		totalAmmo += pInterface->Weapon_GetAmmo(weapon);
 	}
 
+	if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Shotgun), weapon) == true)
+	{
+		totalAmmo += pInterface->Weapon_GetAmmo(weapon);
+	}
+
 	return totalAmmo;
 }
 int InventoryManagement::GetHealth(IExamInterface* pInterface) const

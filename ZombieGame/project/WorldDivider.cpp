@@ -5,7 +5,7 @@ WorldDivider::WorldDivider(Elite::Vector2 center, Elite::Vector2 size)
 	: m_CurrentGrid{ 0 }
 	, m_DestinationQuadrant{ 5 }
 	, m_QuadrantMaxTime{ 25 }
-	, m_RowCollAmount{ 21 }
+	, m_RowCollAmount{ 15 }
 {
 	m_CurrentGrid = (m_RowCollAmount * m_RowCollAmount) / 2;
 	m_DestinationQuadrant = m_CurrentGrid;
@@ -107,6 +107,126 @@ int WorldDivider::GetGridIndex(const grid& grid) const
 	}
 
 	return 0;
+}
+
+int WorldDivider::GetNextGrid()
+{
+	//count visited grids, depending on side
+	//1 - 2 - 3 - 4
+
+	
+	const enum class direction { left, right, up, down };
+	static direction currentDirection{ direction::left };
+
+	static int visitedGrids{ 0 };
+	static int goalGridAmout{ 1 };
+	static bool visitedTwice{ false };
+
+	++visitedGrids;
+	
+	//Go till goal is reached || touched world side || whole world is explored
+	if (visitedGrids >= goalGridAmout || isGridIndexOnWorldBorder(m_CurrentGrid))
+	{
+		visitedGrids = 1;
+		
+		if (goalGridAmout < 2 || visitedTwice == true)
+		{
+			++goalGridAmout;
+			visitedTwice = false;
+		}
+		else
+		{
+			visitedTwice = true;
+		}
+		
+		//Turn left
+
+
+
+		std::cout << "switch\n";
+
+		switch (currentDirection)
+		{
+		case direction::left:
+			currentDirection = direction::down;
+			break;
+		case direction::right:
+			currentDirection = direction::up;
+			break;
+		case direction::up:
+			currentDirection = direction::left;
+			break;
+		case direction::down:
+			currentDirection = direction::right;
+			break;
+		default:
+			break;
+		}
+
+
+	}
+	int nextGrid{ m_CurrentGrid };
+
+	switch (currentDirection)
+	{
+	case direction::left:
+		nextGrid -= 1;
+		break;
+	case direction::right:
+		nextGrid += 1;
+		break;
+	case direction::up:
+		nextGrid -= m_RowCollAmount;
+		break;
+	case direction::down:
+		nextGrid += m_RowCollAmount;
+		break;
+	default:
+		break;
+	}
+
+	return nextGrid;
+}
+
+bool WorldDivider::isGridIndexOnWorldBorder(int index) const
+{
+	if (index % m_RowCollAmount == 0)
+	{
+		//Left side
+		return true;
+	}
+
+	if ((index + 1) % m_RowCollAmount == 0)
+	{
+		//Right side
+		return true;
+	}
+
+	if ((index + m_RowCollAmount) >= m_RowCollAmount * m_RowCollAmount)
+	{
+		//top side
+		return true;
+	}
+
+	if ((index - m_RowCollAmount) < 0)
+	{
+		//bottom side
+		return true;
+	}
+
+	return false;
+}
+
+bool WorldDivider::isWorldExplored() const
+{
+	for (const grid& grid : m_VecGrids)
+	{
+		if (grid.strength == 0)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 std::vector<grid> WorldDivider::GetSurroundingGrids(int currentGridIndex) const

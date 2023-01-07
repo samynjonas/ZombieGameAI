@@ -357,6 +357,13 @@ SteeringPlugin_Output Plugin::UpdateSteering(float dt)
 		m_pBlackboard->ChangeData("attacked", false);
 	}
 
+	//Catch for when the player keeps rotating even when timer is done
+	if (m_pTimer->IsDone() && m_pSteering->IsRotating())
+	{
+		m_pBlackboard->ChangeData("attacked", false);
+		m_pSteering->SetToWander();
+	}
+
 	auto vHousesInFOV = GetHousesInFOV();
 	auto vEntitiesInFOV = GetEntitiesInFOV();
 

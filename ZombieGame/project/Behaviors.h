@@ -190,136 +190,9 @@ namespace BT_Actions
 
 		return Elite::BehaviorState::Success;
 	}
-
-
 	//----------------------
 	//World exploration
 	//----------------------
-	
-	Elite::BehaviorState GoToNextGrid(Elite::Blackboard* pBlackboard)
-	{
-		AgentInfo* pAgent;
-		Steering* pSteering;
-		IExamInterface* pInterface;
-		WorldDivider* pWorldDivider;
-		InventoryManagement* pInventory;
-
-		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
-		{
-			return Elite::BehaviorState::Failure;
-		}
-
-		if (pBlackboard->GetData("Inventory", pInventory) == false || pInventory == nullptr)
-		{
-			return Elite::BehaviorState::Failure;
-		}
-
-		if (pBlackboard->GetData("Steering", pSteering) == false || pSteering == nullptr)
-		{
-			return Elite::BehaviorState::Failure;
-		}
-
-		if (pBlackboard->GetData("Interface", pInterface) == false || pInterface == nullptr)
-		{
-			return Elite::BehaviorState::Failure;
-		}
-
-		if (pBlackboard->GetData("WorldDivider", pWorldDivider) == false || pWorldDivider == nullptr)
-		{
-			return Elite::BehaviorState::Failure;
-		}		
-
-		static int destIndex{ pWorldDivider->GetDestinationGrid() };		
-
-		Elite::Vector2 gridPos{ pWorldDivider->GetAllGrids()[destIndex].GetCenter() };
-		
-		if (pAgent->Position.DistanceSquared(gridPos) <= 25)
-		{
-			std::vector<grid> positiveGrids;
-			std::vector<grid> normalGrids;
-			std::vector<grid> negativeGrids;
-			std::vector<grid> positiveNormalGrids;
-
-			for (const grid& currentgrid : pWorldDivider->GetSurroundingGrids(pWorldDivider->GetCurrentGridIndex()))
-			{
-				if (currentgrid.strength > 0)
-				{
-					positiveGrids.push_back(currentgrid);
-					positiveNormalGrids.push_back(currentgrid);
-				}
-				else if (currentgrid.strength == 0)
-				{
-					normalGrids.push_back(currentgrid);
-					positiveNormalGrids.push_back(currentgrid);
-				}
-				else if (currentgrid.strength < 0)
-				{
-					negativeGrids.push_back(currentgrid);
-				}
-			}
-
-			bool canNormal{ false };
-			bool canPositive{ false };
-
-			//Explore
-			if (normalGrids.empty() == false)
-			{
-				canNormal = true;
-			}
-
-			if (positiveGrids.empty() == false)
-			{
-				if (pAgent->Health < 5)
-				{
-					if (pInventory->GetHealth(pInterface) <= 0)
-					{
-						//Has no healing but is low --- prefer known grid with houses
-						canPositive = true;
-					}
-				}
-
-				if (pAgent->Energy < 5)
-				{
-					if (pInventory->GetEnergy(pInterface) <= 0)
-					{
-						//Has no food but is low --- prefer known grid with houses
-						canPositive = true;
-					}
-				}
-			}
-
-			if (canNormal == false && canPositive == false)
-			{
-				//pick negative
-				int random = rand() % static_cast<int>(negativeGrids.size());
-				destIndex = pWorldDivider->GetGridIndex(negativeGrids[random]);
-			}
-			else if (canNormal == true && canPositive == false)
-			{
-				//pick normal
-				int random = rand() % static_cast<int>(normalGrids.size());
-				destIndex = pWorldDivider->GetGridIndex(normalGrids[random]);
-			}
-			else if (canNormal == true && canPositive == true)
-			{
-				//pick 2-3 positive normal
-				int random = rand() % static_cast<int>(positiveNormalGrids.size());
-				destIndex = pWorldDivider->GetGridIndex(positiveNormalGrids[random]);
-			}
-			else if (canNormal == false && canPositive == true)
-			{
-				//pick positive
-				int random = rand() % static_cast<int>(positiveGrids.size());
-				destIndex = pWorldDivider->GetGridIndex(positiveGrids[random]);
-			}
-		}
-
-		Elite::Vector2 goToPoint = pInterface->NavMesh_GetClosestPathPoint(gridPos);
-		
-		pSteering->SetRunMode(false);
-		pSteering->SetToSeek(goToPoint);
-		return Elite::BehaviorState::Running;
-	}
 
 
 	Elite::BehaviorState VisitedNextGrid(Elite::Blackboard* pBlackboard)
@@ -359,7 +232,8 @@ namespace BT_Actions
 		static int destIndex{ pWorldDivider->GetNextGrid() };
 		Elite::Vector2 gridPos{ pWorldDivider->GetAllGrids()[destIndex].GetCenter() };
 
-		if (pAgent->Position.DistanceSquared(gridPos) <= 25)
+		float distanceToPoint{ pAgent->FOV_Range };
+		if (pAgent->Position.DistanceSquared(gridPos) <= (distanceToPoint * distanceToPoint))
 		{
 			//Calculate new next
 			destIndex = pWorldDivider->GetNextGrid();
@@ -367,13 +241,21 @@ namespace BT_Actions
 
 		Elite::Vector2 goToPoint = pInterface->NavMesh_GetClosestPathPoint(gridPos);
 
-		pSteering->SetRunMode(false);
+
+		if (pAgent->Energy <= 2 && pInventory->GetEnergy(pInterface) == 0 || pAgent->WasBitten || pAgent->Health <= 2 && pInventory->GetHealth(pInterface) == 0)
+		{
+			pSteering->SetRunMode(true);
+		}
+		else
+		{
+			pSteering->SetRunMode(false);
+		}
+
+
 		pSteering->SetToSeek(goToPoint);
 		return Elite::BehaviorState::Running;
 
 	}
-	
-	
 	Elite::BehaviorState ExploreQuadrant(Elite::Blackboard* pBlackboard)
 	{
 		Steering* pSteering;
@@ -529,8 +411,7 @@ namespace BT_Actions
 		}
 
 		pSteering->SetRunMode(true);
-		pSteering->SetToForward();
-		return Elite::BehaviorState::Running;
+		return Elite::BehaviorState::Failure;
 	}
 	Elite::BehaviorState AttackEnemy(Elite::Blackboard* pBlackboard)
 	{
@@ -618,9 +499,8 @@ namespace BT_Actions
 			}
 		}
 
-		pSteering->SetRunMode(true);
-		pSteering->SetToForward();
-		pSteering->SetToRotateLeft();
+		pSteering->SetRunMode(false);
+		pSteering->SetToRotateAndBackwards();
 		return Elite::BehaviorState::Running;
 	}
 
@@ -772,15 +652,18 @@ namespace BT_Actions
 
 	Elite::BehaviorState LootHouse(Elite::Blackboard* pBlackboard)
 	{
-		bool wasBitten;
+		/*bool wasBitten;
 		if (pBlackboard->GetData("attacked", wasBitten) == false)
 		{
 			return Elite::BehaviorState::Failure;
 		}
 		if (wasBitten == true)
 		{
-			return Elite::BehaviorState::Failure;
-		}
+			return Elite::BehaviorState::Success;
+		}*/
+
+		std::cout << "loot house\n";
+
 
 		bool hasLooted;
 		HouseInfo* pHouse;
@@ -826,7 +709,7 @@ namespace BT_Actions
 
 
 		static int currentStage{ 0 };
-		float wallOffset{ 5.f };
+		float wallOffset{ 10 };
 
 		float halfSizeX{ pHouse->Size.x / 2 };
 		float halfSizeY{ pHouse->Size.y / 2};
@@ -838,25 +721,72 @@ namespace BT_Actions
 			{	pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y - halfSizeY + wallOffset },
 			{	pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset }
 		};
-
 		//updating points
 		lootingStages[0] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
 		lootingStages[1] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
 		lootingStages[2] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
 		lootingStages[3] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
 
-		float range{ 10 };
+		static std::vector<int> visitedPoints{};
 
-		if (pAgent->Position.DistanceSquared(lootingStages[currentStage]) <= range)
+		float range{ 5 };
+
+
+		for (int index{}; index < lootingStages.size(); ++index)
 		{
-			++currentStage;
+			bool visited{ false };
+			for (int VSindex{}; VSindex < visitedPoints.size(); ++VSindex)
+			{
+				if (index == visitedPoints[VSindex])
+				{
+					visited = true;
+					break;
+				}
+			}
+			if (visited == true)
+			{
+				continue;
+			}
+
+			if (pAgent->Position.Distance(lootingStages[index]) <= range)
+			{
+				visitedPoints.push_back(index);
+				continue;
+			}
+
+			currentStage = index;
 		}
 
-		if (currentStage >= lootingStages.size())
+		if (pAgent->Position.Distance(lootingStages[currentStage]) <= range)
+		{
+			for (int index{}; index < lootingStages.size(); ++index)
+			{
+				bool visited{ false };
+				for (int VSindex{}; VSindex < visitedPoints.size(); ++VSindex)
+				{
+					if (index == visitedPoints[VSindex])
+					{
+						visited = true;
+						break;
+					}
+				}
+				if (visited == true)
+				{
+					continue;
+				}
+				currentStage = index;
+			}
+		}
+
+
+
+		if (currentStage >= lootingStages.size() || visitedPoints.size() == lootingStages.size())
 		{
 			pWorldDivider->AddHouse(*pHouse);
 
 			currentStage = 0;
+
+			visitedPoints.clear();
 
 			pBlackboard->ChangeData("Looted", true);
 			return Elite::BehaviorState::Success;
@@ -867,7 +797,8 @@ namespace BT_Actions
 		pSteering->SetToSeek(goToPoint);
 
 		return Elite::BehaviorState::Running;
-	}	
+	}
+	
 	Elite::BehaviorState hasLeftHouse(Elite::Blackboard* pBlackboard)
 	{
 		AgentInfo* pAgent;
@@ -1056,7 +987,6 @@ namespace BT_Actions
 
 		return Elite::BehaviorState::Failure;
 	}
-
 
 
 	//----------------------
@@ -1415,7 +1345,7 @@ namespace BT_Conditions
 		}
 
 		//If health is lower then 5
-		if (pAgent->Health <= 5)
+		if (pAgent->Health <= 4)
 		{
 			return true;
 		}
@@ -1431,7 +1361,7 @@ namespace BT_Conditions
 			return false;
 		}
 
-		if (pAgent->Energy <= 5)
+		if (pAgent->Energy <= 3)
 		{
 			return true;
 		}
@@ -1450,8 +1380,5 @@ namespace BT_Conditions
 
 		return pTimer->IsDone();
 	}
-
-
-
 }
 #endif

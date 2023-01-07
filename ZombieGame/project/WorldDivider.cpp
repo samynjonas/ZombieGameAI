@@ -5,7 +5,7 @@ WorldDivider::WorldDivider(Elite::Vector2 center, Elite::Vector2 size)
 	: m_CurrentGrid{ 0 }
 	, m_DestinationQuadrant{ 5 }
 	, m_QuadrantMaxTime{ 25 }
-	, m_RowCollAmount{ 15 }
+	, m_RowCollAmount{ 17 }
 {
 	m_CurrentGrid = (m_RowCollAmount * m_RowCollAmount) / 2;
 	m_DestinationQuadrant = m_CurrentGrid;
@@ -110,16 +110,12 @@ int WorldDivider::GetGridIndex(const grid& grid) const
 }
 
 int WorldDivider::GetNextGrid()
-{
-	//count visited grids, depending on side
-	//1 - 2 - 3 - 4
-
-	
+{	
 	const enum class direction { left, right, up, down };
 	static direction currentDirection{ direction::left };
 
 	static int visitedGrids{ 0 };
-	static int goalGridAmout{ 1 };
+	static int goalGridAmout{ 0 };
 	static bool visitedTwice{ false };
 
 	++visitedGrids;
@@ -127,23 +123,9 @@ int WorldDivider::GetNextGrid()
 	//Go till goal is reached || touched world side || whole world is explored
 	if (visitedGrids >= goalGridAmout || isGridIndexOnWorldBorder(m_CurrentGrid))
 	{
-		visitedGrids = 1;
-		
-		if (goalGridAmout < 2 || visitedTwice == true)
-		{
-			++goalGridAmout;
-			visitedTwice = false;
-		}
-		else
-		{
-			visitedTwice = true;
-		}
-		
-		//Turn left
+		visitedGrids = 0;
+		++goalGridAmout;
 
-
-
-		std::cout << "switch\n";
 
 		switch (currentDirection)
 		{

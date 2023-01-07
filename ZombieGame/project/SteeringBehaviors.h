@@ -142,3 +142,12 @@ public:
 
 };
 
+class RotateAndWalkbackwards : public RotateLeft
+{
+public:
+	RotateAndWalkbackwards() = default;
+	virtual ~RotateAndWalkbackwards() = default;
+
+	SteeringPlugin_Output calculateSteering(float deltaT, AgentInfo* pAgent) override;
+};
+

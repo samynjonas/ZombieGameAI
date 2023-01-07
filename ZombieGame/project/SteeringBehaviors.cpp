@@ -140,6 +140,16 @@ SteeringPlugin_Output RotateLeft::calculateSteering(float deltaT, AgentInfo* age
 	return steering;
 }
 
+SteeringPlugin_Output RotateAndWalkbackwards::calculateSteering(float deltaT, AgentInfo* pAgent)
+{
+	SteeringPlugin_Output steering{ RotateLeft::calculateSteering(deltaT, pAgent) };
+
+	steering.LinearVelocity = pAgent->LinearVelocity * pAgent->MaxLinearSpeed * -1;
+
+	return steering;
+}
+
+
 SteeringPlugin_Output turnAround::calculateSteering(float deltaT, AgentInfo* pAgent)
 {
 	Elite::Vector2 point{ pAgent->Position + (pAgent->LinearVelocity * -1) * 4 };

@@ -153,12 +153,7 @@ bool InventoryManagement::Heal(IExamInterface* pInterface)
 bool InventoryManagement::Shoot(IExamInterface* pInterface)
 {
 	ItemInfo pistol;
-	if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Pistol), pistol) == false)
-	{
-		return false;
-	}
-
-	if (pInterface->Weapon_GetAmmo(pistol) == 0)
+	if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Pistol), pistol) == false || pInterface->Weapon_GetAmmo(pistol) == 0)
 	{
 		ItemInfo shotgun;
 		if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Shotgun), shotgun) == false)
@@ -166,6 +161,7 @@ bool InventoryManagement::Shoot(IExamInterface* pInterface)
 			return false;
 		}
 		return pInterface->Inventory_UseItem(static_cast<UINT>(slot::Shotgun));
+
 	}
 	return pInterface->Inventory_UseItem(static_cast<UINT>(slot::Pistol));
 }
@@ -174,15 +170,16 @@ int InventoryManagement::GetAmmo(IExamInterface* pInterface) const
 {
 	int totalAmmo{ 0 };
 
-	ItemInfo weapon;
-	if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Pistol), weapon) == true)
+	ItemInfo pistol;
+	if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Pistol), pistol) == true)
 	{
-		totalAmmo += pInterface->Weapon_GetAmmo(weapon);
+		totalAmmo += pInterface->Weapon_GetAmmo(pistol);
 	}
 
-	if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Shotgun), weapon) == true)
+	ItemInfo shotgun;
+	if (pInterface->Inventory_GetItem(static_cast<UINT>(slot::Shotgun), shotgun) == true)
 	{
-		totalAmmo += pInterface->Weapon_GetAmmo(weapon);
+		totalAmmo += pInterface->Weapon_GetAmmo(shotgun);
 	}
 
 	return totalAmmo;

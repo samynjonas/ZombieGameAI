@@ -15,6 +15,7 @@ Steering::Steering()
 	m_pTurnAround = new turnAround();
 	m_pFleeBackwards = new FleeBackward();
 	m_pSeekBackwards = new SeekBackwards();
+	m_pRotateAndBackwards = new RotateAndWalkbackwards();
 }
 
 Steering::~Steering()
@@ -29,6 +30,7 @@ Steering::~Steering()
 	SAFE_DELETE(m_pForward);
 	SAFE_DELETE(m_pFleeBackwards);
 	SAFE_DELETE(m_pSeekBackwards);
+	SAFE_DELETE(m_pRotateAndBackwards);
 }
 
 bool Steering::SetToWander()
@@ -90,6 +92,12 @@ bool Steering::SetToSeekBackwards(Elite::Vector2 target)
 	return true;
 }
 
+bool Steering::SetToRotateAndBackwards()
+{
+	m_pCurrentSteering = m_pRotateAndBackwards;
+	return true;
+}
+
 void Steering::SetRunMode(bool set)
 {
 	m_RunMode = set;
@@ -102,6 +110,15 @@ SteeringPlugin_Output Steering::GetSteering(float deltaT, AgentInfo* agent) cons
 	steering.RunMode = m_RunMode;
 
 	return steering;
+}
+
+bool Steering::IsRotating() const
+{
+	if (m_pCurrentSteering == m_pRotateLeft)
+	{
+		return true;
+	}
+	return false;
 }
 
 Elite::Vector2 Steering::GetTarget() const

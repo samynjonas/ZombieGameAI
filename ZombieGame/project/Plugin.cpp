@@ -50,7 +50,6 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 	m_pBlackboard->AddData("EnteringHouse", bool{ false });
 	m_pBlackboard->AddData("Looted",		bool{ false });
 	m_pBlackboard->AddData("currentLoot",	int{ 0 });
-	m_pBlackboard->AddData("attacked",		bool{ false });
 
 
 	//Behavior tree
@@ -106,7 +105,7 @@ void Plugin::Initialize(IBaseInterface* pInterface, PluginInfo& info)
 							new Elite::BehaviorSequence
 							(
 								{
-									new Elite::BehaviorAction(BT_Actions::GoToClosestHouse)
+									new Elite::BehaviorAction(BT_Actions::RunFromEnemy)
 								}
 							)
 						}
@@ -341,28 +340,6 @@ SteeringPlugin_Output Plugin::UpdateSteering(float dt)
 	auto steering = SteeringPlugin_Output();
 
 	auto agentInfo = m_pInterface->Agent_GetInfo();
-
-	bool wasAttacked{};
-	m_pBlackboard->GetData("attacked", wasAttacked);
-
-	if (agentInfo.WasBitten == true && wasAttacked == false)
-	{
-		m_pBlackboard->ChangeData("attacked", true);
-		m_pTimer->Reset();
-	}
-	
-	m_pTimer->Update(dt);
-	if (m_pTimer->IsDone() && wasAttacked == true)
-	{
-		m_pBlackboard->ChangeData("attacked", false);
-	}
-
-	//Catch for when the player keeps rotating even when timer is done
-	if (m_pTimer->IsDone() && m_pSteering->IsRotating())
-	{
-		m_pBlackboard->ChangeData("attacked", false);
-		m_pSteering->SetToWander();
-	}
 
 	auto vHousesInFOV = GetHousesInFOV();
 	auto vEntitiesInFOV = GetEntitiesInFOV();

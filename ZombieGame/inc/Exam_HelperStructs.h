@@ -6,8 +6,68 @@ struct SteeringPlugin_Output
 {
 	Elite::Vector2 LinearVelocity = { 0.f,0.f };
 	float AngularVelocity = 0.f;
-	bool AutoOrient = false; //TODO changed
+	bool AutoOrient = false;
 	bool RunMode = false;
+};
+
+
+struct SteeringPlugin_Output_Expanded
+{
+	Elite::Vector2 LinearVelocity = { 0.f,0.f };
+	float AngularVelocity = 0.f;
+	bool AutoOrient = false;
+	bool RunMode = false;
+
+	bool IsValid = true;
+
+	SteeringPlugin_Output_Expanded(Elite::Vector2 linVel = { 0.f,0.f }, float angVel = 0.f, bool isValid = true)
+	{
+		LinearVelocity = linVel;
+		AngularVelocity = angVel;
+		IsValid = isValid;
+	}
+
+	SteeringPlugin_Output_Expanded& operator=(const SteeringPlugin_Output_Expanded& other)
+	{
+		LinearVelocity = other.LinearVelocity;
+		AngularVelocity = other.AngularVelocity;
+		IsValid = other.IsValid;
+
+		return *this;
+	}
+
+	SteeringPlugin_Output_Expanded& operator+(const SteeringPlugin_Output_Expanded& other)
+	{
+		LinearVelocity += other.LinearVelocity;
+		AngularVelocity += other.AngularVelocity;
+
+		return *this;
+	}
+
+	SteeringPlugin_Output_Expanded& operator*=(const SteeringPlugin_Output_Expanded& other)
+	{
+		LinearVelocity = LinearVelocity * other.LinearVelocity;
+		AngularVelocity = AngularVelocity * other.AngularVelocity;
+
+		return *this;
+	}
+
+	SteeringPlugin_Output_Expanded& operator*=(float f)
+	{
+		LinearVelocity = f * LinearVelocity;
+		AngularVelocity = f * AngularVelocity;
+
+		return *this;
+	}
+
+	SteeringPlugin_Output_Expanded& operator/=(float f)
+	{
+		LinearVelocity = LinearVelocity / f;
+		AngularVelocity = AngularVelocity / f;
+
+		return *this;
+	}
+
 };
 
 struct PluginInfo

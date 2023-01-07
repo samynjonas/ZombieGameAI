@@ -190,11 +190,10 @@ namespace BT_Actions
 
 		return Elite::BehaviorState::Success;
 	}
+	
 	//----------------------
 	//World exploration
 	//----------------------
-
-
 	Elite::BehaviorState VisitedNextGrid(Elite::Blackboard* pBlackboard)
 	{
 		AgentInfo* pAgent;
@@ -233,7 +232,8 @@ namespace BT_Actions
 		Elite::Vector2 gridPos{ pWorldDivider->GetAllGrids()[destIndex].GetCenter() };
 
 		float distanceToPoint{ pAgent->FOV_Range };
-		if (pAgent->Position.DistanceSquared(gridPos) <= (distanceToPoint * distanceToPoint))
+
+		if (pAgent->Position.DistanceSquared(gridPos) <= distanceToPoint * distanceToPoint)
 		{
 			//Calculate new next
 			destIndex = pWorldDivider->GetNextGrid();
@@ -251,8 +251,8 @@ namespace BT_Actions
 			pSteering->SetRunMode(false);
 		}
 
+		pSteering->SetToSeekRotating(goToPoint);
 
-		pSteering->SetToSeek(goToPoint);
 		return Elite::BehaviorState::Running;
 
 	}
@@ -268,7 +268,6 @@ namespace BT_Actions
 		pSteering->SetToWander();
 		return Elite::BehaviorState::Success;
 	}
-
 
 
 	//----------------------
@@ -291,7 +290,6 @@ namespace BT_Actions
 		}
 
 		pInventory->Shoot(pInterface);
-		pBlackboard->ChangeData("attacked", false);
 
 		return Elite::BehaviorState::Success;
 	}
@@ -510,16 +508,6 @@ namespace BT_Actions
 	//----------------------
 	Elite::BehaviorState EnterHouse(Elite::Blackboard* pBlackboard)
 	{
-		bool wasBitten;
-		if (pBlackboard->GetData("attacked", wasBitten) == false)
-		{
-			return Elite::BehaviorState::Failure;
-		}
-		if (wasBitten == true)
-		{
-			return Elite::BehaviorState::Failure;
-		}
-
 		AgentInfo* pAgent;
 		HouseInfo* pHouse;
 		Steering* pSteering;
@@ -652,19 +640,6 @@ namespace BT_Actions
 
 	Elite::BehaviorState LootHouse(Elite::Blackboard* pBlackboard)
 	{
-		/*bool wasBitten;
-		if (pBlackboard->GetData("attacked", wasBitten) == false)
-		{
-			return Elite::BehaviorState::Failure;
-		}
-		if (wasBitten == true)
-		{
-			return Elite::BehaviorState::Success;
-		}*/
-
-		std::cout << "loot house\n";
-
-
 		bool hasLooted;
 		HouseInfo* pHouse;
 		AgentInfo* pAgent;
@@ -716,16 +691,18 @@ namespace BT_Actions
 		
 		static std::vector<Elite::Vector2> lootingStages
 		{
+			{	pHouse->Center.x,						   pHouse->Center.y },
 			{	pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y + halfSizeY - wallOffset },
 			{	pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y + halfSizeY - wallOffset },
 			{	pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y - halfSizeY + wallOffset },
 			{	pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset }
 		};
 		//updating points
-		lootingStages[0] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
-		lootingStages[1] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
-		lootingStages[2] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
-		lootingStages[3] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
+		lootingStages[1] = { pHouse->Center.x,							pHouse->Center.y };
+		lootingStages[1] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
+		lootingStages[2] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
+		lootingStages[3] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
+		lootingStages[4] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
 
 		static std::vector<int> visitedPoints{};
 
@@ -794,7 +771,7 @@ namespace BT_Actions
 
 		Elite::Vector2 goToPoint = pInterface->NavMesh_GetClosestPathPoint(lootingStages[currentStage]);
 
-		pSteering->SetToSeek(goToPoint);
+		pSteering->SetToSeekRotating(goToPoint, 0.75f);
 
 		return Elite::BehaviorState::Running;
 	}
@@ -895,6 +872,10 @@ namespace BT_Actions
 		pSteering->SetRunMode(true);
 		pSteering->SetToSeek(point);
 
+		if (pAgent->Position.Distance(point) <= 10)
+		{
+			return Elite::BehaviorState::Success;
+		}
 		return Elite::BehaviorState::Running;
 	}
 	
@@ -975,7 +956,7 @@ namespace BT_Actions
 		if (distance >= pAgent->GrabRange)
 		{
 			pSteering->SetRunMode(false);
-			pSteering->SetToSeek(Items[closestIndex]);
+			pSteering->SetToArrive(Items[closestIndex]);
 			return Elite::BehaviorState::Running;
 		}
 
@@ -1188,11 +1169,6 @@ namespace BT_Conditions
 		//retrieving valid data from blackboard
 		AgentInfo* pAgent;
 		std::vector<EntityInfo>* pEntitiesVec;
-		bool wasAttacked;
-		if (pBlackboard->GetData("attacked", wasAttacked) == false)
-		{
-			return false;
-		}
 		if (pBlackboard->GetData("Agent", pAgent) == false || pAgent == nullptr)
 		{
 			return false;
@@ -1202,10 +1178,6 @@ namespace BT_Conditions
 			return false;
 		}
 
-		if (wasAttacked)
-		{
-			return true;
-		}
 		
 		if (pAgent->WasBitten)
 		{
@@ -1258,7 +1230,7 @@ namespace BT_Conditions
 		float angleToEnemyDeg{	Elite::ToDegrees(angleToEnemy) };
 		float playerAngleDeg{	Elite::ToDegrees(pAgent->Orientation) };
 
-		float angleOffset{ 5.f };
+		float angleOffset{ 3.5f };
 
 		if (angleToEnemyDeg > playerAngleDeg - angleOffset && angleToEnemyDeg < playerAngleDeg + angleOffset)
 		{

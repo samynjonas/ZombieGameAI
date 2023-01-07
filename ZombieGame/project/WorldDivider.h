@@ -111,15 +111,9 @@ private:
 	int m_CurrentGrid;
 	int m_DestinationQuadrant;
 	int m_RowCollAmount;
-	
-
-
 
 	std::vector<std::vector<Elite::Vector2>> m_VecExploredHousesInQuadrant;
-
 	std::vector<grid> m_VecGrids;
 
-	Timer* m_pTimer;
-	float m_QuadrantMaxTime;
 };
 

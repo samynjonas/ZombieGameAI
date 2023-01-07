@@ -4,13 +4,10 @@
 WorldDivider::WorldDivider(Elite::Vector2 center, Elite::Vector2 size)
 	: m_CurrentGrid{ 0 }
 	, m_DestinationQuadrant{ 5 }
-	, m_QuadrantMaxTime{ 25 }
-	, m_RowCollAmount{ 17 }
+	, m_RowCollAmount{ 21 }
 {
 	m_CurrentGrid = (m_RowCollAmount * m_RowCollAmount) / 2;
 	m_DestinationQuadrant = m_CurrentGrid;
-
-	m_pTimer = new Timer(m_QuadrantMaxTime);
 
 	Elite::Vector2 worldPos{ center.x - size.x / 2, center.y - size.y / 2 };
 

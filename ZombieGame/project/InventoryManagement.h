@@ -31,10 +31,10 @@ public:
 	int GetEnergy(IExamInterface* pInterface) const;
 
 
-	ItemInfo& GetPistol(IExamInterface* pInterface);
-	ItemInfo& GetShotgun(IExamInterface* pInterface);
-	ItemInfo& GetHealing(IExamInterface* pInterface);
-	ItemInfo& GetFood(IExamInterface* pInterface);
+	ItemInfo GetPistol(IExamInterface* pInterface);
+	ItemInfo GetShotgun(IExamInterface* pInterface);
+	ItemInfo GetHealing(IExamInterface* pInterface);
+	ItemInfo GetFood(IExamInterface* pInterface);
 
 private:
 

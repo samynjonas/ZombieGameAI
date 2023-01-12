@@ -206,25 +206,25 @@ int InventoryManagement::GetEnergy(IExamInterface* pInterface) const
 }
 
 
-ItemInfo& InventoryManagement::GetPistol(IExamInterface* pInterface)
+ItemInfo InventoryManagement::GetPistol(IExamInterface* pInterface)
 {
 	ItemInfo weapon;
 	pInterface->Inventory_GetItem(static_cast<UINT>(slot::Pistol), weapon);
 	return weapon;
 }
-ItemInfo& InventoryManagement::GetShotgun(IExamInterface* pInterface)
+ItemInfo InventoryManagement::GetShotgun(IExamInterface* pInterface)
 {
 	ItemInfo weapon;
 	pInterface->Inventory_GetItem(static_cast<UINT>(slot::Shotgun), weapon);
 	return weapon;
 }
-ItemInfo& InventoryManagement::GetHealing(IExamInterface* pInterface)
+ItemInfo InventoryManagement::GetHealing(IExamInterface* pInterface)
 {
 	ItemInfo healing;
 	pInterface->Inventory_GetItem(static_cast<UINT>(slot::Healing), healing);
 	return healing;
 }
-ItemInfo& InventoryManagement::GetFood(IExamInterface* pInterface)
+ItemInfo InventoryManagement::GetFood(IExamInterface* pInterface)
 {
 	ItemInfo food;
 	pInterface->Inventory_GetItem(static_cast<UINT>(slot::Food), food);

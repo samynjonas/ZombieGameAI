@@ -709,10 +709,10 @@ namespace BT_Actions
 		float range{ 5 };
 
 
-		for (int index{}; index < lootingStages.size(); ++index)
+		for (int index{}; index < static_cast<int>(lootingStages.size()); ++index)
 		{
 			bool visited{ false };
-			for (int VSindex{}; VSindex < visitedPoints.size(); ++VSindex)
+			for (int VSindex{}; VSindex < static_cast<int>(visitedPoints.size()); ++VSindex)
 			{
 				if (index == visitedPoints[VSindex])
 				{
@@ -736,10 +736,10 @@ namespace BT_Actions
 
 		if (pAgent->Position.Distance(lootingStages[currentStage]) <= range)
 		{
-			for (int index{}; index < lootingStages.size(); ++index)
+			for (int index{}; index < static_cast<int>(lootingStages.size()); ++index)
 			{
 				bool visited{ false };
-				for (int VSindex{}; VSindex < visitedPoints.size(); ++VSindex)
+				for (int VSindex{}; VSindex < static_cast<int>(visitedPoints.size()); ++VSindex)
 				{
 					if (index == visitedPoints[VSindex])
 					{
@@ -757,7 +757,7 @@ namespace BT_Actions
 
 
 
-		if (currentStage >= lootingStages.size() || visitedPoints.size() == lootingStages.size())
+		if (currentStage >= static_cast<int>(lootingStages.size()) || visitedPoints.size() == lootingStages.size())
 		{
 			pWorldDivider->AddHouse(*pHouse);
 
@@ -816,6 +816,8 @@ namespace BT_Actions
 			pBlackboard->ChangeData("Looted", false);
 			return Elite::BehaviorState::Failure;
 		}
+
+		return Elite::BehaviorState::Running;
 	}
 
 

@@ -3,22 +3,10 @@
 C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\EBehaviorTree.cpp(102,2): warning C4809: switch statement has redundant 'default' label; all possible 'case' labels are given
   InventoryManagement.cpp
   Plugin.cpp
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(734,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(737,32): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(761,28): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(764,33): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(782,20): warning C4018: '>=': signed/unsigned mismatch
   Steering.cpp
   SteeringBehaviors.cpp
   Timer.cpp
   WorldDivider.cpp
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(20,33): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(22,34): warning C4018: '<': signed/unsigned mismatch
   Generating Code...
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(841): warning C4715: 'BT_Actions::hasLeftHouse': not all control paths return a value
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(213): warning C4172: returning address of local variable or temporary: weapon
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(219): warning C4172: returning address of local variable or temporary: weapon
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(225): warning C4172: returning address of local variable or temporary: healing
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(231): warning C4172: returning address of local variable or temporary: food
      Creating library C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\..\_DEMO_DEBUG\GPP_Plugin_d.lib and object C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\..\_DEMO_DEBUG\GPP_Plugin_d.exp
   GPP_Exam.vcxproj -> C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\_DEMO_DEBUG\GPP_Plugin_d.dll

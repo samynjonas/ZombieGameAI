@@ -14,9 +14,9 @@ WorldDivider::WorldDivider(Elite::Vector2 center, Elite::Vector2 size)
 	float gridWidth{ size.x / m_RowCollAmount };
 	float gridHeight{ size.y / m_RowCollAmount };
 
-	for (size_t Windex = 0; Windex < m_RowCollAmount; Windex++)
+	for (int Windex = 0; Windex < m_RowCollAmount; Windex++)
 	{
-		for (size_t Hindex = 0; Hindex < m_RowCollAmount; Hindex++)
+		for (int Hindex = 0; Hindex < m_RowCollAmount; Hindex++)
 		{
 			m_VecGrids.push_back(grid{ worldPos.x + Windex * gridWidth, worldPos.y + Hindex * gridHeight, gridWidth, gridHeight });
 			m_VecExploredHousesInQuadrant.push_back(std::vector<Elite::Vector2>{});

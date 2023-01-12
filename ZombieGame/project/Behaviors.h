@@ -402,13 +402,14 @@ namespace BT_Actions
 				target = enemies[closestIndex];
 
 				pSteering->SetRunMode(true);
-				pSteering->SetToFlee(target);
+				/*pSteering->SetToFlee(target);
+				pSteering->SetToBlended()*/
 				
 				return Elite::BehaviorState::Running;
 			}			
 		}
 
-		pSteering->SetRunMode(true);
+		pSteering->SetRunMode(false);
 		return Elite::BehaviorState::Failure;
 	}
 	Elite::BehaviorState AttackEnemy(Elite::Blackboard* pBlackboard)
@@ -554,7 +555,7 @@ namespace BT_Actions
 		{
 			//Get all not visited houses
 			std::vector<HouseInfo> NotVisitedHouse;
-			for (const HouseInfo currentHouse : (*pHouseVec))
+			for (const HouseInfo& currentHouse : *pHouseVec)
 			{
 				if (pWorldDivider->constainsHouse(currentHouse.Center) == false)
 				{
@@ -579,12 +580,17 @@ namespace BT_Actions
 					distance = checkDistance;
 					closestIndex = index;
 				}
-			}
+			}			
 
 			pHouse = new HouseInfo(NotVisitedHouse[closestIndex]);
 			pBlackboard->ChangeData("House", pHouse);		
 		}
 		
+		
+		if (pWorldDivider->constainsHouse(pHouse->Center) == true)
+		{
+			return Elite::BehaviorState::Failure;
+		}
 		Elite::Vector2 point = pInterface->NavMesh_GetClosestPathPoint(pHouse->Center);	
 
 		pSteering->SetToSeek(point);
@@ -697,68 +703,48 @@ namespace BT_Actions
 			{	pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y - halfSizeY + wallOffset },
 			{	pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset }
 		};
+
 		//updating points
-		lootingStages[1] = { pHouse->Center.x,							pHouse->Center.y };
+		lootingStages[0] = { pHouse->Center.x,							pHouse->Center.y };
 		lootingStages[1] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
 		lootingStages[2] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y + halfSizeY - wallOffset };
 		lootingStages[3] = { pHouse->Center.x + halfSizeX - wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
 		lootingStages[4] = { pHouse->Center.x - halfSizeX + wallOffset, pHouse->Center.y - halfSizeY + wallOffset };
 
+		//pInterface->Draw_SolidCircle()
+
+
 		static std::vector<int> visitedPoints{};
 
-		float range{ 5 };
+		float range{ pAgent->FOV_Range / 2.f };
 
 
-		for (int index{}; index < static_cast<int>(lootingStages.size()); ++index)
-		{
-			bool visited{ false };
-			for (int VSindex{}; VSindex < static_cast<int>(visitedPoints.size()); ++VSindex)
-			{
-				if (index == visitedPoints[VSindex])
-				{
-					visited = true;
-					break;
-				}
-			}
-			if (visited == true)
-			{
-				continue;
-			}
+		float widthToPoint{ lootingStages[currentStage].x - pAgent->Position.x};
+		float heightToPoint{ lootingStages[currentStage].y - pAgent->Position.y };
 
-			if (pAgent->Position.Distance(lootingStages[index]) <= range)
-			{
-				visitedPoints.push_back(index);
-				continue;
-			}
+		float angleToEnemy{ atan2f(heightToPoint, widthToPoint) };
 
-			currentStage = index;
-		}
+		float angleToEnemyDeg{ Elite::ToDegrees(angleToEnemy) };
+		float playerAngleDeg{ Elite::ToDegrees(pAgent->Orientation) };
+
+		float angleOffset{ 15.f };
+
+		
 
 		if (pAgent->Position.Distance(lootingStages[currentStage]) <= range)
 		{
-			for (int index{}; index < static_cast<int>(lootingStages.size()); ++index)
+			if (angleToEnemyDeg > playerAngleDeg - angleOffset && angleToEnemyDeg < playerAngleDeg + angleOffset || pAgent->Position.Distance(lootingStages[currentStage]) <= 2.5f)
 			{
-				bool visited{ false };
-				for (int VSindex{}; VSindex < static_cast<int>(visitedPoints.size()); ++VSindex)
-				{
-					if (index == visitedPoints[VSindex])
-					{
-						visited = true;
-						break;
-					}
-				}
-				if (visited == true)
-				{
-					continue;
-				}
-				currentStage = index;
+				currentStage++;
 			}
 		}
 
 
 
-		if (currentStage >= static_cast<int>(lootingStages.size()) || visitedPoints.size() == lootingStages.size())
+		if (currentStage >= static_cast<int>(lootingStages.size()) || visitedPoints.size() == lootingStages.size() || pAgent->IsInHouse == false)
 		{
+			std::cout << "add looted house\n";
+
 			pWorldDivider->AddHouse(*pHouse);
 
 			currentStage = 0;
@@ -771,7 +757,7 @@ namespace BT_Actions
 
 		Elite::Vector2 goToPoint = pInterface->NavMesh_GetClosestPathPoint(lootingStages[currentStage]);
 
-		pSteering->SetToSeekRotating(goToPoint, 0.75f);
+		pSteering->SetToSeek(goToPoint);
 
 		return Elite::BehaviorState::Running;
 	}
@@ -1088,7 +1074,6 @@ namespace BT_Conditions
 			return false;
 		}
 
-
 		if (pAgent->IsInHouse)
 		{
 			return false;
@@ -1096,7 +1081,7 @@ namespace BT_Conditions
 
 		//Check if house is visited yet
 		std::vector<HouseInfo> NotVisitedHouse;
-		for (const HouseInfo currentHouse : (*pHouseVec))
+		for (const HouseInfo& currentHouse : (*pHouseVec))
 		{
 			if (pWorldDivider->constainsHouse(currentHouse.Center) == false)
 			{

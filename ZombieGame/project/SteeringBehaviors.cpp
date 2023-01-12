@@ -80,11 +80,6 @@ SteeringPlugin_Output_Expanded Flee::calculateSteering(float deltaT, AgentInfo* 
 	Elite::Vector2 fromTarget = agent->Position - m_Target;
 	float distance = fromTarget.Magnitude();
 
-	/*if (distance > m_FleeRadius)
-	{
-		return steering;
-	}*/
-
 	steering.LinearVelocity = fromTarget;
 	steering.LinearVelocity.Normalize();
 	steering.LinearVelocity *= agent->MaxLinearSpeed;

@@ -3,23 +3,15 @@
 C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\EBehaviorTree.cpp(102,2): warning C4809: switch statement has redundant 'default' label; all possible 'case' labels are given
   InventoryManagement.cpp
   Plugin.cpp
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(712,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(715,32): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(739,28): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(742,33): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(760,20): warning C4018: '>=': signed/unsigned mismatch
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.h(108,15): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.h(110,14): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
   Steering.cpp
   SteeringBehaviors.cpp
   Timer.cpp
   WorldDivider.cpp
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(17,33): warning C4018: '<': signed/unsigned mismatch
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.cpp(19,34): warning C4018: '<': signed/unsigned mismatch
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.h(108,15): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\WorldDivider.h(110,14): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
   Generating Code...
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\Behaviors.h(819): warning C4715: 'BT_Actions::hasLeftHouse': not all control paths return a value
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(213): warning C4172: returning address of local variable or temporary: weapon
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(219): warning C4172: returning address of local variable or temporary: weapon
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(225): warning C4172: returning address of local variable or temporary: healing
-C:\Users\samyn\OneDrive - Hogeschool West-Vlaanderen\Documenten\GitHub\ZombieGameAI\ZombieGame\project\InventoryManagement.cpp(231): warning C4172: returning address of local variable or temporary: food
   GPP_PluginBase.lib(IBaseInterface.obj) : MSIL .netmodule or module compiled with /GL found; restarting link with /LTCG; add /LTCG to the link command line to improve linker performance
      Creating library _Temp\Release\GPP_Plugin.lib and object _Temp\Release\GPP_Plugin.exp
   Generating code

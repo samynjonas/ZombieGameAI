@@ -52,6 +52,11 @@ void WorldDivider::Render(IExamInterface* pInterface) const
 		Elite::Vector2 points[]{p0, p1, p2, p3};
 		pInterface->Draw_SolidPolygon(points, 4, color / 10);
 	}
+
+	for (const auto& village : m_VecVillages)
+	{
+		village.Render(pInterface);
+	}
 }
 
 void WorldDivider::Update(float deltaT, Elite::Vector2 playerPos)
@@ -363,6 +368,25 @@ void WorldDivider::AddHouse(HouseInfo house)
 			m_VecExploredHousesInQuadrant[GetGridIndex(grid)].push_back(house.Center);
 			continue;
 		}
+	}
+
+
+	const int villageToHouseMaxRange{ 15 };
+	bool AddedToVillage{ false };
+
+
+	for (auto& village : m_VecVillages)
+	{
+		if (house.Center.Distance(village.center) <= villageToHouseMaxRange + village.GetLargestSide())
+		{
+			village.AddHouse(house);
+			AddedToVillage = true;
+		}
+	}
+
+	if (AddedToVillage == false)
+	{
+		m_VecVillages.push_back(house);
 	}
 
 	m_VecExploredHousesInQuadrant[m_CurrentGrid].push_back(house.Center);

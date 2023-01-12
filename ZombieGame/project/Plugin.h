@@ -43,12 +43,12 @@ private:
 	UINT m_InventorySlot = 0;
 	
 	//My variables
-	Steering* m_pSteering;
-	Elite::Blackboard* m_pBlackboard;
-	Elite::BehaviorTree* m_pBehaviorTree;
-	InventoryManagement* m_pInventoryManager;
-	Timer* m_pTimer;
-	WorldDivider* m_pWorldDivider;
+	Timer* m_pTimer = nullptr;
+	Steering* m_pSteering = nullptr;
+	WorldDivider* m_pWorldDivider = nullptr;
+	Elite::Blackboard* m_pBlackboard = nullptr;
+	Elite::BehaviorTree* m_pBehaviorTree = nullptr;
+	InventoryManagement* m_pInventoryManager = nullptr;
 
 
 };

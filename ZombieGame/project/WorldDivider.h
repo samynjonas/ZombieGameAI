@@ -73,6 +73,63 @@ struct grid
 	int strength; //Will go up when there is something interesting in it
 };
 
+struct village
+{
+	const float SIZEOFFSET{ 15 };
+	int houses{ 1 };
+
+	village(const HouseInfo& house)
+		: center{ house.Center }
+		, size{ house.Size.x + SIZEOFFSET, house.Size.y + SIZEOFFSET }
+	{
+
+	}
+
+	bool AddHouse(const HouseInfo& house)
+	{
+		center.x += house.Center.x - center.x;
+		center.y += house.Center.y - center.y;
+
+		float normalSizeX = size.x - SIZEOFFSET;
+		float normalSizeY = size.y - SIZEOFFSET;
+
+		size.x = house.Center.x - center.x + normalSizeX / 2.f + house.Size.x / 2.f + SIZEOFFSET;
+		size.y = house.Center.y - center.y + normalSizeY / 2.f + house.Size.y / 2.f + SIZEOFFSET;
+
+		houses++;
+
+		return true;
+	}
+
+	int GetLargestSide()
+	{
+		if (size.x > size.y)
+		{
+			return size.x;
+		}
+		return size.y;
+	}
+
+	void Render(IExamInterface* pInterface) const
+	{
+		const float halfHeigth{ size.y / 2 };
+		const float halfWidth{ size.x / 2 };
+
+		Elite::Vector2 p0{ center.x - halfWidth,					  center.y - halfHeigth };
+		Elite::Vector2 p1{ center.x - halfWidth,					  center.y + halfHeigth };
+		Elite::Vector2 p2{ center.x + halfWidth,					  center.y + halfHeigth };
+		Elite::Vector2 p3{ center.x + halfWidth,					  center.y - halfHeigth };
+		Elite::Vector2 points[]{ p0, p1, p2, p3 };
+
+
+		pInterface->Draw_SolidPolygon(points, 4, {1, 200, 200}, 0);
+	}
+
+
+	Elite::Vector2 center;
+	Elite::Vector2 size;
+};
+
 
 class WorldDivider final
 {
@@ -114,6 +171,9 @@ private:
 
 	std::vector<std::vector<Elite::Vector2>> m_VecExploredHousesInQuadrant;
 	std::vector<grid> m_VecGrids;
+
+
+	std::vector<village> m_VecVillages;
 
 };
 

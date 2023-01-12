@@ -1164,7 +1164,6 @@ namespace BT_Conditions
 		{
 			return false;
 		}
-
 		
 		if (pAgent->WasBitten)
 		{
